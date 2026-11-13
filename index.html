@@ -248,13 +248,19 @@ const PLACES = {
   ciya:{n:"Kadıköy-Markt & Çiya Sofrası",cat:"tipp",ll:[40.9897,29.0258],d:"Essensmarkt (täglich) + berühmtes anatolisches Lokal, 3 Min. vom Hotel"},
   baylan:{n:"Baylan Pastanesi",cat:"tipp",ll:[40.9876,29.0283],d:"Kult-Konditorei, Klassiker: Kup Griye"},
   aliusta:{n:"Ali Usta (Moda)",cat:"tipp",ll:[40.9818,29.0265],d:"Eis mit 50+ Sorten, im Winter Sahlep mit Eis"},
-  modacoast:{n:"Moda-Ufer zum Sonnenuntergang",cat:"tipp",ll:[40.9790,29.0245],d:"Wie die Locals auf den Steinen sitzen, Tee oder Bier"},
+  modacoast:{n:"Spaziergang am Moda-Ufer",cat:"tipp",ll:[40.9790,29.0245],d:"Promenade am Meer, Park & Tee mit Blick aufs Wasser"},
   akmar:{n:"Akmar Pasajı",cat:"tipp",ll:[40.9895,29.0275],d:"Passage mit Vinyl- und Bücherläden"},
   kuzguncuk:{n:"Kuzguncuk",cat:"tipp",ll:[41.0367,29.0297],d:"Bunte Holzhäuser, Frühstückscafés, direkt bei der Zipline"},
   kilicali:{n:"Kılıç Ali Paşa Hamamı",cat:"tipp",ll:[41.0255,28.9810],d:"Edelster Hamam, Karaköy. Frauen tagsüber, vorher buchen"},
   cemberlitas:{n:"Çemberlitaş Hamamı",cat:"tipp",ll:[41.0085,28.9718],d:"Historisch (1584), günstiger, direkt an der T1"},
   ist_modern:{n:"Istanbul Modern",cat:"tipp",ll:[41.0262,28.9830],d:"Museum am Wasser in Karaköy, gut bei Regen"},
   balikci:{n:"Tarihi Karaköy Balıkçısı",cat:"tipp",ll:[41.0225,28.9760],d:"Winziges Fischlokal im Han, ca. 12:30 da sein (Lage ungefähr)"},
+  balikekmek:{n:"Balık Ekmek in Eminönü",cat:"food",ll:[41.0177,28.9722],d:"Fischbrötchen von den Booten am Ufer, Istanbul-Klassiker"},
+  pandeli:{n:"Pandeli",cat:"food",ll:[41.0168,28.9706],d:"Historisches Restaurant mit blauen Fliesen, über dem Gewürzbasar"},
+  hafiz:{n:"Hafız Mustafa 1864",cat:"food",ll:[41.0151,28.9766],d:"Baklava, Lokum & Tee, berühmte Konditorei in Sirkeci"},
+  gulluoglu:{n:"Karaköy Güllüoğlu",cat:"food",ll:[41.0229,28.9768],d:"Die bekannteste Baklava der Stadt"},
+  mandabatmaz:{n:"Mandabatmaz",cat:"food",ll:[41.0335,28.9774],d:"Winziges Kult-Café, sehr dicker türkischer Kaffee, nahe İstiklal"},
+  kumpir:{n:"Kumpir in Ortaköy",cat:"food",ll:[41.0476,29.0262],d:"Gefüllte Ofenkartoffel von den Ständen am Wasser"},
   ferrytour:{n:"Öffentliche Bosporus-Tour",cat:"tipp",ll:[41.0172,28.9735],d:"Şehir Hatları ab Eminönü, viel günstiger als private Cruises"}
 };
 const TRAVELERS=["Valä","Cha","Bettä"];
@@ -272,14 +278,32 @@ const DAYS = [
         {t:"12:00",p:"saw",info:"Basel-Flug: M4 direkt zum SAW, knapp 1 Std."}],
    max:2, fill:"Morgen"}
 ];
-// Welcher Ort an welchem Tag, in Routen-Reihenfolge
-const SLOT={
-  ciya:["do",1],wizards:["do",2],akmar:["do",3],
-  panorama:["fr",0],bazaar:["fr",1],cemberlitas:["fr",2],hagia:["fr",3],topkapi:["fr",4],cistern:["fr",5],bluemosque:["fr",6],dirihan:["fr",7],spice:["fr",8],shine:["fr",9],
-  moda:["sa",0],ist_modern:["sa",1],kilicali:["sa",2],salt:["sa",3],balikci:["sa",4],galata:["sa",5],misir:["sa",6],taksim:["sa",7],ferrytour:["sa",8],ortakoy:["sa",9],rooftop:["sa",10],
-  baylan:["so",1],aliusta:["so",2],modacoast:["so",3],
-  kuzguncuk:["x",0],zipline:["x",1],camlica:["x",2],balat:["x",3]
+// Aktivitäten: [Tag, Tageszeit (vm/nm/ab), Reihenfolge]
+const ACT={
+  panorama:["fr","vm",0],bazaar:["fr","vm",1],hagia:["fr","vm",2],topkapi:["fr","vm",3],
+  cistern:["fr","nm",1],bluemosque:["fr","nm",2],cemberlitas:["fr","nm",3],dirihan:["fr","nm",4],spice:["fr","nm",5],
+  ist_modern:["sa","vm",1],kilicali:["sa","vm",2],salt:["sa","vm",3],galata:["sa","vm",4],
+  misir:["sa","nm",1],taksim:["sa","nm",2],ferrytour:["sa","nm",3],ortakoy:["sa","ab",0],
+  akmar:["do","ab",5],modacoast:["so","vm",1],
+  kuzguncuk:["x","vm",0],zipline:["x","nm",1],camlica:["x","nm",2],balat:["x","vm",3]
 };
+const ACT_MAX={do:1,fr:6,sa:6,so:1};
+// Essen: [Gegend, passende Mahlzeiten]  br=Frühstück lu=Mittag sn=Kaffee/Dessert di=Abendessen dr=Drinks
+const FOOD={
+  moda:["kad",["br"]],baylan:["kad",["sn","br"]],aliusta:["kad",["sn"]],ciya:["kad",["di","lu"]],wizards:["kad",["sn","dr"]],shine:["kad",["dr"]],
+  balikekmek:["alt",["lu","sn"]],pandeli:["alt",["lu"]],hafiz:["alt",["sn"]],
+  balikci:["bey",["lu"]],gulluoglu:["bey",["sn"]],mandabatmaz:["bey",["sn"]],kumpir:["bey",["sn","di"]],rooftop:["bey",["dr","di"]]
+};
+const AREA={kad:"Kadıköy & Moda",alt:"Altstadt",bey:"Karaköy & Beyoğlu"};
+const MEAL={br:"Frühstück",lu:"Mittagessen",sn:"Kaffee & Dessert",di:"Abendessen",dr:"Drinks"};
+// Mahlzeiten pro Tag: [Uhrzeit-Label, Mahlzeiten, Gegend, Position in der Zeitleiste]
+const MEALSLOTS={
+  do:[["19:30",["di"],"kad",350],["Danach",["sn","dr"],"kad",450]],
+  fr:[["Mittag",["lu"],"alt",150],["Pause",["sn"],"alt",250],["Abend",["di","dr"],"kad",450]],
+  sa:[["Frühstück",["br"],"kad",0],["Mittag",["lu"],"bey",150],["Pause",["sn"],"bey",250],["Abend",["dr","di"],"bey",450]],
+  so:[["Frühstück",["br","sn"],"kad",0]]
+};
+const PARTPOS={vm:100,nm:200,ab:400};
 
 // ---------- Speicher (nur dieses Gerät) ----------
 const store = {
@@ -325,7 +349,7 @@ document.getElementById("legend").innerHTML=Object.values(CATS).map(c=>`<span st
 let curDay = (()=>{const t=new Date().toLocaleDateString("sv-SE",{timeZone:"Europe/Istanbul"});const i=DAYS.findIndex(d=>d.date===t);return i<0?1:i})();
 let planResult=null; // wird vom Swipen gefüllt, sobald alle fertig sind
 function dayStops(d){
-  const mid=planResult?(planResult.days[d.key]||[]).map((r,i)=>({t:i===0&&d.fill?d.fill:"",p:r.id,info:PLACES[r.id].d+(r.star?" ⭐":"")})):[];
+  const mid=planResult?(planResult.days[d.key]||[]).map(r=>({t:r.t||"",p:r.id,info:(r.meal?MEAL[r.meal]+" · ":"")+PLACES[r.id].d+(r.star?" ⭐":"")})):[];
   return [...d.start,...mid,...d.end];
 }
 function renderTabs(){
@@ -400,12 +424,10 @@ renderTabs();renderDay();renderFilters();renderPlaces();loadWeather();
 const SUPABASE_URL="https://nwrrdbbnuseljmeqojey.supabase.co";
 const SUPABASE_KEY="sb_publishable_dvT7vJwoqNc62HFM64Y-9Q_5c-TUCpV";
 const TRIP="istanbul-2026";
-const ZONE_UNUSED={wizards:"asia",shine:"asia",moda:"asia",ciya:"asia",baylan:"asia",aliusta:"asia",modacoast:"asia",akmar:"asia",kuzguncuk:"far",zipline:"far",camlica:"far",
-  bazaar:"fr",bluemosque:"fr",cistern:"fr",hagia:"fr",topkapi:"fr",dirihan:"fr",spice:"fr",panorama:"fr",cemberlitas:"fr",
-  salt:"sa",galata:"sa",misir:"sa",taksim:"sa",ortakoy:"sa",rooftop:"sa",kilicali:"sa",ist_modern:"sa",balikci:"sa",ferrytour:"sa",balat:"far"};
-const DAYLABEL={do:"📅 Do-Abend · Kadıköy",fr:"📅 Freitag · Altstadt",sa:"📅 Samstag · Galata & Bosporus",so:"📅 So-Morgen · Kadıköy & Moda",x:"✨ Ausflug, braucht Extra-Zeit"};
-const EMO={sight:"🕌",shop:"🛍️",food:"☕",extra:"✨",tipp:"💡"};
-const SW_IDS=Object.keys(SLOT);
+const EMO={sight:"🕌",shop:"🛍️",food:"🍽️",extra:"✨",tipp:"💡"};
+const DAYLABEL={do:"📅 Do-Abend",fr:"📅 Freitag · Altstadt",sa:"📅 Samstag · Galata & Bosporus",so:"📅 So-Morgen · Moda",x:"✨ Ausflug, braucht Extra-Zeit"};
+const SWCATS={food:{label:"🍽️ Essen & Drinks",ids:Object.keys(FOOD)},act:{label:"🎯 Aktivitäten",ids:Object.keys(ACT)}};
+const SW_IDS=[...SWCATS.food.ids,...SWCATS.act.ids];
 const swEl=document.getElementById("swipe");
 const esc=t=>String(t).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
 const db=(SUPABASE_URL&&SUPABASE_KEY&&window.supabase)?window.supabase.createClient(SUPABASE_URL,SUPABASE_KEY):null;
@@ -413,8 +435,11 @@ const db=(SUPABASE_URL&&SUPABASE_KEY&&window.supabase)?window.supabase.createCli
 let me=store.get("ist-me","");
 if(me&&!TRAVELERS.includes(me))me="";
 let myVotes=store.get("ist-myvotes",{});
+let curCat=null;
 let everyone={};
-const doneV=v=>v&&SW_IDS.every(id=>v[id]!==undefined);
+const doneIds=(v,ids)=>v&&ids.every(id=>v[id]!==undefined);
+const doneV=v=>doneIds(v,SW_IDS);
+const cnt=(v,ids)=>ids.filter(id=>v&&v[id]!==undefined).length;
 
 async function pull(){
   if(db){
@@ -439,63 +464,88 @@ function scoreRows(){
 function computePlan(){
   const allDone=TRAVELERS.every(n=>doneV(everyone[n]));
   if(!allDone){if(planResult){planResult=null;renderDay()}return}
-  const {rows}=scoreRows(),N=TRAVELERS.length;
-  // gewählt: mind. 2 von 3 wollen, oder jemand hat ⭐
-  const chosen=rows.filter(r=>r.yes>=Math.ceil(N*2/3)||r.star);
+  const {rows}=scoreRows(),N=TRAVELERS.length,need=Math.ceil(N*2/3);
+  const isChosen=r=>r.yes>=need||r.star;
   const days={},extra=[];
+  DAYS.forEach(d=>days[d.key]=[]);
+  // 1) Aktivitäten nach Ort/Tag
+  const acts=rows.filter(r=>ACT[r.id]&&isChosen(r));
   DAYS.forEach(d=>{
-    const l=chosen.filter(r=>SLOT[r.id][0]===d.key).sort((a,b)=>b.score-a.score);
-    l.slice(d.max).forEach(r=>extra.push(r));
-    days[d.key]=l.slice(0,d.max).sort((a,b)=>SLOT[a.id][1]-SLOT[b.id][1]);
+    const l=acts.filter(r=>ACT[r.id][0]===d.key);
+    l.slice(ACT_MAX[d.key]).forEach(r=>extra.push(r));
+    l.slice(0,ACT_MAX[d.key]).forEach(r=>days[d.key].push({...r,pos:PARTPOS[ACT[r.id][1]]+ACT[r.id][2],t:""}));
   });
-  chosen.filter(r=>SLOT[r.id][0]==="x").forEach(r=>extra.push(r));
+  acts.filter(r=>ACT[r.id][0]==="x").forEach(r=>extra.push(r));
+  // 2) Essen in passende Mahlzeit-Slots in der Nähe (beste Punkte zuerst)
+  const used=new Set();
+  const foodRows=rows.filter(r=>FOOD[r.id]);
+  DAYS.forEach(d=>(MEALSLOTS[d.key]||[]).forEach(([t,meals,area,pos])=>{
+    const fits=r=>!used.has(r.id)&&FOOD[r.id][0]===area&&FOOD[r.id][1].some(m=>meals.includes(m));
+    const pick=foodRows.find(r=>isChosen(r)&&fits(r))||foodRows.find(r=>r.yes>0&&fits(r));
+    if(pick){used.add(pick.id);days[d.key].push({...pick,pos,t,meal:FOOD[pick.id][1].find(m=>meals.includes(m))})}
+  }));
+  // erste Aktivität bekommt ein Zeit-Label
+  DAYS.forEach(d=>{days[d.key].sort((a,b)=>a.pos-b.pos);
+    let lastPart="";days[d.key].forEach(r=>{if(!r.meal){const p=ACT[r.id][1];if(p!==lastPart){r.t={vm:"Vormittag",nm:"Nachmittag",ab:"Abend"}[p];lastPart=p}}})});
+  foodRows.filter(r=>isChosen(r)&&!used.has(r.id)).forEach(r=>extra.push(r));
   const before=JSON.stringify(planResult);
-  planResult={days,extra,chosen};
+  planResult={days,extra};
   if(JSON.stringify(planResult)!==before)renderDay();
 }
 
 async function renderSwipe(){
   if(!me) return renderStart();
-  if(!doneV(myVotes)) return renderStack();
+  if(curCat&&!doneIds(myVotes,SWCATS[curCat].ids)) return renderStack();
+  if(!doneV(myVotes)) return renderCats();
   await pull(); renderResults();
 }
 function statusLine(){
-  return TRAVELERS.map(n=>{const c=Object.keys(everyone[n]||{}).filter(id=>SW_IDS.includes(id)).length;
+  return TRAVELERS.map(n=>{const c=cnt(everyone[n],SW_IDS);
     return `<span style="white-space:nowrap">${doneV(everyone[n])?"✅":"⏳"} ${esc(n)}${doneV(everyone[n])?"":` ${c}/${SW_IDS.length}`}</span>`}).join(" &nbsp; ");
 }
 async function renderStart(){
   await pull();
   swEl.innerHTML=`<div class="sw-center">
-    <p>Swipe alle ${SW_IDS.length} Orte: ❤️ will ich, ✕ eher nicht, ⭐ unbedingt.<br>Sobald alle drei fertig sind, erscheint oben euer Programm.</p>
+    <p>Swipe in zwei Runden: 🍽️ Essen & Drinks und 🎯 Aktivitäten.<br>❤️ will ich, ✕ eher nicht, ⭐ unbedingt.<br>Sobald alle drei fertig sind, erscheint oben euer Programm.</p>
     <p style="font-weight:600;margin:14px 0 8px">Wer swipt?</p>
     <div style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap">${TRAVELERS.map(n=>`<button class="btn" data-me="${esc(n)}" style="min-width:90px">${esc(n)}</button>`).join("")}</div>
     <p class="daynote" style="margin-top:14px">${statusLine()}</p>
     ${db?"":'<p class="muted">⚠️ Gemeinsamer Speicher nicht erreichbar.</p>'}</div>`;
   swEl.querySelectorAll("[data-me]").forEach(b=>b.onclick=()=>{
     me=b.dataset.me;store.set("ist-me",me);if(window.renderPack)renderPack();
-    myVotes={...(everyone[me]||{})};store.set("ist-myvotes",myVotes);renderSwipe();
+    myVotes={...(everyone[me]||{})};store.set("ist-myvotes",myVotes);curCat=null;renderSwipe();
   });
 }
+function renderCats(){
+  swEl.innerHTML=`<div class="sw-center"><p class="sw-who">Hallo ${esc(me)}! Was swipst du?</p>
+    <div style="display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin-top:10px">${Object.entries(SWCATS).map(([k,c])=>{const d=cnt(myVotes,c.ids),t=c.ids.length,ok=d===t;
+      return `<button class="btn ${ok?"ghost":""}" data-cat="${k}" style="min-width:200px;padding:16px 20px">${c.label}<br><span style="font-weight:500;font-size:.85rem">${ok?"✅ fertig":`${d}/${t}`}</span></button>`}).join("")}</div>
+    <p class="daynote" style="margin-top:14px">${statusLine()}</p>
+    <button class="btn ghost small" id="sw-who">Nicht ${esc(me)}?</button></div>`;
+  swEl.querySelectorAll("[data-cat]").forEach(b=>b.onclick=()=>{curCat=b.dataset.cat;renderSwipe()});
+  document.getElementById("sw-who").onclick=switchUser;
+}
 function renderStack(){
-  const todo=SW_IDS.filter(id=>myVotes[id]===undefined);
-  if(!todo.length) return renderSwipe();
-  const pct=Math.round((SW_IDS.length-todo.length)/SW_IDS.length*100);
-  const card=(id,back)=>{const p=PLACES[id];return `<div class="sw-card${back?" back":""}" data-id="${id}" style="background:linear-gradient(160deg,${CATS[p.cat].c},#0f2a43)">
-    <div class="sw-emoji">${EMO[p.cat]||"📍"}</div><div class="stamp"></div>
-    <h3>${p.n}</h3><p>${p.d}</p><span class="sw-day">${DAYLABEL[SLOT[id][0]]}</span></div>`};
-  swEl.innerHTML=`<div class="sw-who">${esc(me)} swipt · ${SW_IDS.length-todo.length+1}/${SW_IDS.length}</div>
+  const ids=SWCATS[curCat].ids,todo=ids.filter(id=>myVotes[id]===undefined);
+  if(!todo.length){curCat=null;return renderSwipe()}
+  const pct=Math.round((ids.length-todo.length)/ids.length*100);
+  const tag=id=>FOOD[id]?`📍 ${AREA[FOOD[id][0]]} · ${FOOD[id][1].map(m=>MEAL[m]).join(" / ")}`:DAYLABEL[ACT[id][0]];
+  const card=(id,back)=>{const p=PLACES[id];return `<div class="sw-card${back?" back":""}" data-id="${id}" style="background:linear-gradient(160deg,${FOOD[id]?"#c8553d":CATS[p.cat].c},#0f2a43)">
+    <div class="sw-emoji">${FOOD[id]?"🍽️":EMO[p.cat]||"📍"}</div><div class="stamp"></div>
+    <h3>${p.n}</h3><p>${p.d}</p><span class="sw-day">${tag(id)}</span></div>`};
+  swEl.innerHTML=`<div class="sw-who">${esc(me)} · ${SWCATS[curCat].label} · ${ids.length-todo.length+1}/${ids.length}</div>
     <div class="sw-progress"><div style="width:${pct}%"></div></div>
     <div class="stack">${todo[1]?card(todo[1],true):""}${card(todo[0])}</div>
     <div class="sw-btns"><button class="sw-btn" data-v="0" aria-label="Nein">✕</button><button class="sw-btn star" data-v="2" aria-label="Unbedingt">⭐</button><button class="sw-btn" data-v="1" aria-label="Ja">❤️</button></div>
-    <div class="sw-center"><button class="btn ghost small" id="sw-undo">↩︎ Zurück</button> <button class="btn ghost small" id="sw-who">Nicht ${esc(me)}?</button></div>`;
+    <div class="sw-center"><button class="btn ghost small" id="sw-undo">↩︎ Zurück</button> <button class="btn ghost small" id="sw-back">Kategorie wechseln</button></div>`;
   const top=swEl.querySelector(".stack .sw-card:last-child"),stamp=top.querySelector(".stamp");
   const vote=v=>{
     top.style.transform=v===2?"translateY(-600px)":`translateX(${v?600:-600}px) rotate(${v?25:-25}deg)`;
     myVotes[top.dataset.id]=v;push();setTimeout(renderSwipe,220);
   };
   swEl.querySelectorAll(".sw-btn").forEach(b=>b.onclick=()=>vote(+b.dataset.v));
-  document.getElementById("sw-undo").onclick=()=>{const d=SW_IDS.filter(id=>myVotes[id]!==undefined);if(d.length){delete myVotes[d[d.length-1]];push();renderStack()}};
-  document.getElementById("sw-who").onclick=switchUser;
+  document.getElementById("sw-undo").onclick=()=>{const d=ids.filter(id=>myVotes[id]!==undefined);if(d.length){delete myVotes[d[d.length-1]];push();renderStack()}};
+  document.getElementById("sw-back").onclick=()=>{curCat=null;renderSwipe()};
   let x0=null,y0=0;
   top.addEventListener("pointerdown",e=>{x0=e.clientX;y0=e.clientY;top.classList.add("drag");top.setPointerCapture(e.pointerId)});
   top.addEventListener("pointermove",e=>{if(x0===null)return;const dx=e.clientX-x0,dy=Math.min(0,e.clientY-y0);
@@ -505,19 +555,20 @@ function renderStack(){
     if(dy<-110&&Math.abs(dx)<80)vote(2);else if(dx>100)vote(1);else if(dx<-100)vote(0);else{top.style.transform="";stamp.style.opacity=0}};
   top.addEventListener("pointerup",end);top.addEventListener("pointercancel",end);
 }
-function switchUser(){me="";myVotes={};store.set("ist-me","");store.set("ist-myvotes",{});renderSwipe();if(window.renderPack)renderPack()}
+function switchUser(){me="";myVotes={};curCat=null;store.set("ist-me","");store.set("ist-myvotes",{});renderSwipe();if(window.renderPack)renderPack()}
 
 function renderResults(){
   const allDone=TRAVELERS.every(n=>doneV(everyone[n]));
   const {P,rows}=scoreRows(),N=P.length;
   const icon=v=>v===2?"⭐":v===1?"❤️":"✕";
   const item=r=>`<div class="res-item"><span class="pn" data-p="${r.id}" style="cursor:pointer">${PLACES[r.id].n}</span><span class="votes">${r.vs.map((v,i)=>`${esc(P[i])} ${icon(v)}`).join(" · ")}</span></div>`;
-  const all=rows.filter(r=>r.yes===N),maybe=rows.filter(r=>r.yes>0&&r.yes<N),no=rows.filter(r=>r.yes===0);
-  swEl.innerHTML=`<p class="daynote" style="text-align:center">${statusLine()}</p>`+(allDone?`
-    <p class="daytitle">🎉 Alle haben geswipt! Euer Programm steht oben im Plan.</p>
+  const block=(k)=>{const rs=rows.filter(r=>SWCATS[k].ids.includes(r.id)),all=rs.filter(r=>r.yes===N),maybe=rs.filter(r=>r.yes>0&&r.yes<N),no=rs.filter(r=>r.yes===0);
+    return `<h3 style="margin:18px 0 0">${SWCATS[k].label}</h3>
     <div class="res-group"><h3>✅ Alle wollen (${all.length})</h3>${all.map(item).join("")||'<p class="muted">–</p>'}</div>
     <div class="res-group"><h3>🤔 Nicht alle (${maybe.length})</h3>${maybe.map(item).join("")||'<p class="muted">–</p>'}</div>
-    <div class="res-group"><h3>❌ Will niemand (${no.length})</h3><p class="muted">${no.map(r=>PLACES[r.id].n).join(", ")||"–"}</p></div>`
+    <div class="res-group"><h3>❌ Will niemand (${no.length})</h3><p class="muted">${no.map(r=>PLACES[r.id].n).join(", ")||"–"}</p></div>`};
+  swEl.innerHTML=`<p class="daynote" style="text-align:center">${statusLine()}</p>`+(allDone?`
+    <p class="daytitle">🎉 Alle haben geswipt! Euer Programm steht oben im Plan.</p>${block("food")}${block("act")}`
     :`<div class="sw-center"><p style="font-size:1.1rem">✅ Danke ${esc(me)}, du bist fertig!</p><p>Sobald alle drei durch sind, erscheint oben euer Programm. Diese Seite aktualisiert sich von selbst.</p></div>`)+`
     <div class="sw-center" style="display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin-top:14px">
       ${allDone?'<button class="btn" id="sw-plan">📅 Zum Plan</button>':""}
@@ -528,8 +579,7 @@ function renderResults(){
   document.getElementById("sw-redo").onclick=()=>{if(confirm("Deine Swipes zurücksetzen und neu swipen?")){myVotes={};push();computePlan();renderSwipe()}};
   document.getElementById("sw-who2").onclick=switchUser;
 }
-// regelmässig aktualisieren, damit Plan & Status für alle stimmen
-async function refreshAll(){if(document.visibilityState!=="visible")return;await pull();if(!me||doneV(myVotes))renderSwipe()}
+async function refreshAll(){if(document.visibilityState!=="visible")return;await pull();if(!me||(doneV(myVotes)&&!curCat))renderSwipe()}
 setInterval(refreshAll,15000);
 document.addEventListener("visibilitychange",refreshAll);
 pull().then(renderSwipe);
@@ -552,7 +602,6 @@ function renderPack(){
   document.querySelectorAll("[data-pk]").forEach(c=>c.onchange=()=>{st[c.dataset.pk]=c.checked;store.set(k,st);renderPack()});
 }
 renderPack();
-const _sw=switchUser;
 </script>
 </body>
 </html>
