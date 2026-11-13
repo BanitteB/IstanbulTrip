@@ -343,7 +343,7 @@ async function loadWeather() {
     el.querySelectorAll("[data-wx]").forEach(b => b.onclick = () => { wxDay = b.dataset.wx; renderHourly() });
     const tip = $("wtip");
     if (rainy.includes("Sa 21.") && !rainy.includes("Fr 20.")) tip.textContent = "☔ Samstag sieht nasser aus als Freitag: Tauscht die Tage! Galata & Bosporus am Freitag, die Altstadt (drinnen) am Samstag.";
-    else if (rainy.length) tip.textContent = `☔ Regen möglich am ${rainy.join(", ")}. Regenjacke & wasserfeste Schuhe einpacken.`;
+    else if (rainy.length) tip.textContent = `☔ Regen möglich am ${rainy.join(", ")} – Regenjacke & wasserfeste Schuhe einpacken.`;
     else tip.textContent = "👍 Sieht gut aus, der Plan passt so.";
     const today = new Date().toLocaleDateString("sv-SE", { timeZone: "Europe/Istanbul" });
     wxDay = DAYS.find(x => x.date === today && d.time.includes(x.date))?.date || DAYS.find(x => d.time.includes(x.date))?.date || null;
