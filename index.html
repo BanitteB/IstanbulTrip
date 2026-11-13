@@ -207,7 +207,24 @@ footer{text-align:center;color:var(--muted);font-size:.78rem;padding:10px 0 30px
     <p class="muted" style="margin:10px 0 0">Alles mit der Istanbulkart-App. Sonnenuntergang ca. 16:40.</p>
   </section>
 </main>
-<footer>Gute Reise! ✈️ Häkchen und Herzen werden auf diesem Gerät gespeichert.</footer>
+<section class="card" id="admin" style="display:none;max-width:1100px;margin:0 auto 30px">
+  <h2>🔧 Admin</h2>
+  <div id="adm-login" class="sw-center">
+    <div class="sw-names"><input id="adm-pw" type="password" placeholder="Admin-Passwort"></div>
+    <button class="btn" id="adm-go">Anmelden</button> <span id="adm-msg" class="muted"></span>
+  </div>
+  <div id="adm-body" style="display:none">
+    <h3 style="font-size:1rem">Swipes</h3>
+    <div id="adm-status" class="daynote"></div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap" id="adm-btns"></div>
+    <h3 style="font-size:1rem;margin-top:20px">Packliste</h3>
+    <p class="muted">Eine Zeile pro Sache. Neue Gruppe mit „#“ beginnen, z. B. „# 🧥 Kleidung“.</p>
+    <textarea id="adm-pack" rows="18" style="width:100%;font:inherit;font-size:.9rem;padding:10px;border:1px solid var(--line);border-radius:10px"></textarea>
+    <div style="margin-top:8px;display:flex;gap:8px;align-items:center"><button class="btn" id="adm-savepack">Packliste speichern</button><span id="adm-packmsg" class="muted"></span></div>
+    <p style="margin-top:20px"><button class="btn ghost small" id="adm-out">Abmelden</button></p>
+  </div>
+</section>
+<footer>Gute Reise! ✈️ · <a href="#admin" style="color:inherit">Admin</a></footer>
 
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -446,6 +463,8 @@ async function pull(){
     const {data,error}=await db.from("swipes").select("name,votes").eq("trip",TRIP);
     if(!error){everyone={};data.forEach(r=>everyone[r.name]=r.votes||{})}else console.warn(error);
   }
+  // vom Admin zurückgesetzt? Dann lokale Swipes auch löschen
+  if(db&&me&&store.get("ist-pushed",false)&&!everyone[me]&&Object.keys(myVotes).length){myVotes={};store.set("ist-myvotes",{});store.set("ist-pushed",false);curCat=null}
   if(me) everyone[me]={...(everyone[me]||{}),...myVotes};
   computePlan();
 }
@@ -455,7 +474,7 @@ function push(){
   if(me) everyone[me]={...myVotes};
   if(!db||!me)return;
   clearTimeout(pushTimer);
-  pushTimer=setTimeout(()=>db.from("swipes").upsert({trip:TRIP,name:me,votes:myVotes,updated_at:new Date().toISOString()}).then(({error})=>error&&console.warn(error)),300);
+  pushTimer=setTimeout(()=>db.from("swipes").upsert({trip:TRIP,name:me,votes:myVotes,updated_at:new Date().toISOString()}).then(({error})=>{if(error)console.warn(error);else store.set("ist-pushed",true)}),300);
 }
 function scoreRows(){
   const P=TRAVELERS.filter(n=>doneV(everyone[n]));
@@ -513,6 +532,7 @@ async function renderStart(){
     ${db?"":'<p class="muted">⚠️ Gemeinsamer Speicher nicht erreichbar.</p>'}</div>`;
   swEl.querySelectorAll("[data-me]").forEach(b=>b.onclick=()=>{
     me=b.dataset.me;store.set("ist-me",me);if(window.renderPack)renderPack();
+if(db)db.from("packlist").select("groups").eq("trip",TRIP).maybeSingle().then(({data})=>{if(data?.groups?.length){PACK=data.groups;renderPack()}});
     myVotes={...(everyone[me]||{})};store.set("ist-myvotes",myVotes);curCat=null;renderSwipe();
   });
 }
@@ -584,8 +604,52 @@ setInterval(refreshAll,15000);
 document.addEventListener("visibilitychange",refreshAll);
 pull().then(renderSwipe);
 
+// ---------- Admin ----------
+let admPw=(()=>{try{return sessionStorage.getItem("ist-adm")||""}catch(e){return ""}})();
+const admEl=document.getElementById("admin");
+function packToText(){return PACK.map(([g,items])=>"# "+g+"\n"+items.join("\n")).join("\n\n")}
+function textToPack(t){const out=[];let cur=null;t.split("\n").map(l=>l.trim()).filter(Boolean).forEach(l=>{
+  if(l.startsWith("#")){cur=[l.replace(/^#+\s*/,""),[]];out.push(cur)}else{if(!cur){cur=["Sonstiges",[]];out.push(cur)}cur[1].push(l)}});return out.filter(g=>g[1].length)}
+async function admRender(){
+  if(location.hash!=="#admin"){admEl.style.display="none";return}
+  admEl.style.display="";admEl.scrollIntoView({behavior:"smooth"});
+  const ok=admPw&&db&&(await db.rpc("admin_check",{pw:admPw})).data===true;
+  document.getElementById("adm-login").style.display=ok?"none":"";
+  document.getElementById("adm-body").style.display=ok?"":"none";
+  if(!ok)return;
+  await pull();
+  document.getElementById("adm-status").innerHTML=statusLine();
+  document.getElementById("adm-btns").innerHTML=TRAVELERS.map(n=>`<button class="btn ghost small" data-reset="${esc(n)}">↺ ${esc(n)} zurücksetzen</button>`).join("")+
+    `<button class="btn small" data-reset="" style="background:var(--terra)">🗑️ Alle Swipes löschen</button>`;
+  document.querySelectorAll("[data-reset]").forEach(b=>b.onclick=async()=>{
+    const who=b.dataset.reset||null;
+    if(!confirm(who?`Swipes von ${who} löschen?`:"Wirklich ALLE Swipes löschen? Das kann man nicht rückgängig machen."))return;
+    const {error}=await db.rpc("admin_reset_swipes",{pw:admPw,who});
+    if(error)return alert("Fehler: "+error.message);
+    if(!who||who===me){myVotes={};store.set("ist-myvotes",{});store.set("ist-pushed",false);curCat=null}
+    everyone={};await pull();renderSwipe();admRender();
+  });
+  const ta=document.getElementById("adm-pack");if(!ta.dataset.loaded){ta.value=packToText();ta.dataset.loaded="1"}
+}
+document.getElementById("adm-go").onclick=async()=>{
+  admPw=document.getElementById("adm-pw").value;
+  const {data}=db?await db.rpc("admin_check",{pw:admPw}):{data:false};
+  if(data===true){try{sessionStorage.setItem("ist-adm",admPw)}catch(e){};document.getElementById("adm-msg").textContent="";admRender()}
+  else document.getElementById("adm-msg").textContent="❌ Falsches Passwort";
+};
+document.getElementById("adm-pw").onkeydown=e=>e.key==="Enter"&&document.getElementById("adm-go").click();
+document.getElementById("adm-savepack").onclick=async()=>{
+  const g=textToPack(document.getElementById("adm-pack").value);
+  const {error}=await db.rpc("admin_set_pack",{pw:admPw,g});
+  document.getElementById("adm-packmsg").textContent=error?"❌ "+error.message:"✅ Gespeichert, alle sehen die neue Liste";
+  if(!error){PACK=g;renderPack()}
+};
+document.getElementById("adm-out").onclick=()=>{admPw="";try{sessionStorage.removeItem("ist-adm")}catch(e){};location.hash="";admRender()};
+window.addEventListener("hashchange",admRender);
+setTimeout(admRender,500);
+
 // ---------- Packliste ----------
-const PACK=[
+let PACK=[
   ["📄 Dokumente",["Pass oder ID","Flugtickets / Boarding Pässe","Hotelbuchung (Otel Kadıköy)","Krankenkassenkarte / Reiseversicherung"]],
   ["💳 Geld & Handy",["Kreditkarte + etwas Bargeld (TRY)","Istanbulkart-App aufgeladen","Powerbank","Ladekabel","Reiseadapter (Schweizer Stecker passen nicht in türkische Steckdosen)"]],
   ["🧥 Kleidung",["Regenjacke","Warmer Pulli / Fleece","Bequeme, wasserfeste Schuhe","Schal oder Tuch (Kopfbedeckung für Moscheen)","Lange Hose / Rock über die Knie (Moscheen)","Etwas Schickes für die Rooftop-Bar","Pyjama"]],
@@ -602,6 +666,7 @@ function renderPack(){
   document.querySelectorAll("[data-pk]").forEach(c=>c.onchange=()=>{st[c.dataset.pk]=c.checked;store.set(k,st);renderPack()});
 }
 renderPack();
+if(db)db.from("packlist").select("groups").eq("trip",TRIP).maybeSingle().then(({data})=>{if(data?.groups?.length){PACK=data.groups;renderPack()}});
 </script>
 </body>
 </html>
