@@ -122,6 +122,18 @@ main{max-width:1100px;margin:-50px auto 40px;padding:0 14px;display:grid;gap:16p
 .ed-2{display:grid;grid-template-columns:1fr 1fr;gap:8px}
 .ed-meals{font-size:.85rem;font-weight:600;margin-top:8px}.ed-meals label{display:inline-flex;gap:4px;font-weight:400;margin:4px 10px 0 0}
 .ed-box{background:#fff;border-radius:10px;padding:10px;margin-top:10px;font-size:.88rem}
+.wxbtn{font:inherit;color:inherit;cursor:pointer;border:0}
+.wxbtn.on{background:#d9efeb;outline:3px solid var(--tile)}
+.hours{overflow-x:auto;background:var(--sand);border-radius:12px;padding:8px 0;-webkit-overflow-scrolling:touch}
+.hr{width:52px;flex:none;text-align:center;font-size:.78rem}
+.hr .ht{color:var(--muted)}.hr .hi{font-size:1.2rem}.hr .hv{font-weight:600}
+.hb{height:28px;width:10px;margin:3px auto 0;background:#e3ecf1;border-radius:3px;display:flex;align-items:flex-end;overflow:hidden}.hb div{width:100%;background:#4a90c2}
+.hp{color:#1d5c7a;font-size:.7rem}
+.phr{display:flex;justify-content:space-between;gap:8px;align-items:center;padding:6px 0;border-top:1px dashed var(--line)}
+.phr .tr{font-weight:600;font-size:.98rem}.phr .muted{font-size:.8rem}
+.say{border:1px solid var(--line);background:#fff;border-radius:50%;width:34px;height:34px;flex:none;cursor:pointer;font-size:1rem}
+.netzwrap{overflow-x:auto;background:#fff;border:1px solid var(--line);border-radius:12px;padding:6px}
+.netz{min-width:640px;width:100%;height:auto;display:block;font-family:Inter,sans-serif}
 footer{text-align:center;color:var(--muted);font-size:.78rem;padding:10px 0 30px}
 </style>
 </head>
@@ -170,6 +182,7 @@ footer{text-align:center;color:var(--muted);font-size:.78rem;padding:10px 0 30px
   <section class="card">
     <h2>🌤️ Wetter in Kadıköy</h2>
     <div class="weather" id="weather"><div class="muted">Lade Prognose…</div></div>
+    <div id="hourly"></div>
     <div class="wtip" id="wtip">Regen? Dann Freitag und Samstag tauschen: Die Altstadt-Tour ist fast komplett drinnen.</div>
     <p class="muted" style="margin:8px 0 0">Daten: Open-Meteo, live beim Öffnen der Seite</p>
   </section>
@@ -181,6 +194,7 @@ footer{text-align:center;color:var(--muted);font-size:.78rem;padding:10px 0 30px
 
   <section class="card span2">
     <h2>🗺️ Karte</h2>
+    <label style="display:inline-flex;gap:6px;align-items:center;font-size:.88rem;margin-bottom:8px;cursor:pointer"><input type="checkbox" id="rail" style="accent-color:var(--tile)"> 🚇 Metro-, Tram- & Bahnlinien einblenden</label>
     <div id="map"></div>
     <div class="legend" id="legend"></div>
   </section>
@@ -197,12 +211,69 @@ footer{text-align:center;color:var(--muted);font-size:.78rem;padding:10px 0 30px
   </section>
 
   <section class="card span2">
+    <h2>🗣️ Türkisch für unterwegs</h2>
+    <p class="daynote" style="margin-top:-4px">ş = „sch“ · ç = „tsch“ · c = „dsch“ · ı = dumpfes „e“ · ğ wird fast verschluckt · 🔊 zum Anhören</p>
+    <div class="routes" id="phrases"></div>
+  </section>
+
+  <section class="card span2">
     <h2>💡 Tipps & Ideen</h2>
     <div class="routes" id="tips"></div>
   </section>
 
   <section class="card span2">
     <h2>🚇 So kommt ihr hin (ab Hotel)</h2>
+    <p class="daynote" style="margin:0 0 6px">Eure wichtigsten Linien (vereinfacht, nicht massstabsgetreu):</p>
+    <div class="netzwrap"><svg viewBox="0 0 900 380" class="netz" role="img" aria-label="Schema der wichtigsten Linien">
+  <rect x="520" y="0" width="70" height="380" fill="#dbeef3"/><text x="555" y="372" text-anchor="middle" font-size="12" fill="#1d5c7a">Bosporus</text>
+  <text x="20" y="22" font-size="13" font-weight="700" fill="#6b7380">EUROPA</text><text x="880" y="22" text-anchor="end" font-size="13" font-weight="700" fill="#6b7380">ASIEN</text>
+  <!-- Fähren -->
+  <g stroke="#1d5c7a" stroke-width="2.5" stroke-dasharray="7 6" fill="none">
+    <path d="M660 300 Q520 260 360 170"/><path d="M660 300 Q540 220 410 125"/><path d="M660 300 Q620 160 520 62"/><path d="M640 150 Q580 100 520 62"/></g>
+  <!-- Marmaray -->
+  <polyline points="110,280 340,190 640,150 710,250" fill="none" stroke="#7aa6c9" stroke-width="7" stroke-linejoin="round"/>
+  <!-- M2 -->
+  <polyline points="110,280 150,210 220,140 300,92 390,52" fill="none" stroke="#00a651" stroke-width="7" stroke-linejoin="round"/>
+  <!-- T1 -->
+  <polyline points="190,250 235,255 285,255 320,225 340,190 360,165 410,125 480,95" fill="none" stroke="#0073b7" stroke-width="7" stroke-linejoin="round"/>
+  <!-- F2 -->
+  <line x1="410" y1="125" x2="325" y2="82" stroke="#8a5a44" stroke-width="5"/>
+  <!-- M4 -->
+  <polyline points="660,300 710,250 780,280 860,345" fill="none" stroke="#e5007e" stroke-width="7" stroke-linejoin="round"/>
+  <text x="800" y="296" font-size="11" fill="#e5007e" transform="rotate(38 800 296)">… ca. 20 Stationen …</text>
+  <!-- T3 Moda -->
+  <circle cx="672" cy="330" r="16" fill="none" stroke="#c8553d" stroke-width="3"/>
+  <!-- Stationen -->
+  <g fill="#fff" stroke="#1d2430" stroke-width="2.5">
+    <circle cx="110" cy="280" r="7"/><circle cx="150" cy="210" r="5"/><circle cx="220" cy="140" r="5"/><circle cx="300" cy="92" r="7"/><circle cx="390" cy="52" r="7"/>
+    <circle cx="190" cy="250" r="5"/><circle cx="235" cy="255" r="5"/><circle cx="285" cy="255" r="6"/><circle cx="320" cy="225" r="5"/><circle cx="340" cy="190" r="7"/><circle cx="360" cy="165" r="7"/><circle cx="410" cy="125" r="7"/><circle cx="480" cy="95" r="5"/>
+    <circle cx="325" cy="82" r="5"/><circle cx="520" cy="62" r="7"/>
+    <circle cx="640" cy="150" r="7"/><circle cx="710" cy="250" r="7"/><circle cx="660" cy="300" r="8"/><circle cx="860" cy="345" r="7"/></g>
+  <g font-size="12" fill="#1d2430">
+    <text x="104" y="302" text-anchor="middle" font-weight="700">Yenikapı</text>
+    <text x="160" y="214">Vezneciler</text><text x="230" y="140">Haliç</text>
+    <text x="286" y="74" text-anchor="end" font-weight="700">Şişhane (Galata)</text><text x="400" y="47" font-weight="700">Taksim</text>
+    <text x="186" y="272" text-anchor="middle">Beyazıt (Basar)</text><text x="232" y="276" text-anchor="middle" font-size="11">Çemberlitaş</text>
+    <text x="290" y="278" text-anchor="middle" font-weight="700">Sultanahmet</text><text x="328" y="240" font-size="11">Gülhane</text>
+    <text x="300" y="194" text-anchor="end" font-weight="700">Sirkeci</text><text x="370" y="170" font-weight="700">Eminönü</text>
+    <text x="420" y="140" font-weight="700">Karaköy</text><text x="488" y="112">Kabataş</text>
+    <text x="318" y="100" text-anchor="end" font-size="11">Tünel (İstiklal)</text>
+    <text x="528" y="54" text-anchor="end" font-weight="700">Beşiktaş</text>
+    <text x="652" y="140" font-weight="700">Üsküdar</text><text x="722" y="246" font-weight="700">Ayrılık Çeşmesi</text>
+    <text x="640" y="326" text-anchor="end" font-weight="700">Kadıköy ⭐ Hotel</text><text x="696" y="352" font-size="11" fill="#c8553d">T3 Moda</text>
+    <text x="852" y="368" text-anchor="end" font-weight="700">Flughafen SAW</text></g>
+  <g font-size="12" font-weight="700" transform="translate(20,320)">
+    <rect width="14" height="6" y="-5" fill="#e5007e"/><text x="20">M4</text>
+    <rect x="60" width="14" height="6" y="-5" fill="#7aa6c9"/><text x="80">Marmaray</text>
+    <rect x="160" width="14" height="6" y="-5" fill="#00a651"/><text x="180">M2</text>
+    <rect x="220" width="14" height="6" y="-5" fill="#0073b7"/><text x="240">T1 Tram</text>
+    <rect x="310" width="14" height="6" y="-5" fill="#8a5a44"/><text x="330">F2</text>
+    <line x1="0" y1="20" x2="16" y2="20" stroke="#1d5c7a" stroke-width="2.5" stroke-dasharray="5 4"/><text x="20" y="24">Fähren</text></g>
+</svg></div>
+    <p style="margin:6px 0 14px;display:flex;gap:8px;flex-wrap:wrap">
+      <a class="btn ghost small" href="https://commons.wikimedia.org/wiki/File:Railway_Metro_Map_of_Istanbul_-_%C4%B0stanbul_Rayl%C4%B1_Sistemler_A%C4%9F_Haritas%C4%B1.pdf" target="_blank" rel="noopener">🗺️ Ganzer Netzplan (Stand 2022)</a>
+      <a class="btn ghost small" href="https://www.metro.istanbul/" target="_blank" rel="noopener">🚇 Metro Istanbul (offiziell)</a>
+      <a class="btn ghost small" href="https://www.google.com/maps/dir/?api=1&origin=Otel+Kad%C4%B1k%C3%B6y&travelmode=transit" target="_blank" rel="noopener">🚌 Bus & ÖV-Route planen</a></p>
     <div class="routes" id="routes"></div>
     <p class="muted" style="margin:10px 0 0">Bezahlen mit der Istanbulkart-App. Bei jedem Ort im Plan und auf der Karte gibt es „🚇 Route“: öffnet Google Maps mit Metro, Tram, Bus und Fähre.</p>
   </section>
@@ -261,6 +332,6 @@ footer{text-align:center;color:var(--muted);font-size:.78rem;padding:10px 0 30px
 
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="app.js?v=10"></script>
+<script src="app.js?v=11"></script>
 </body>
 </html>

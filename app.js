@@ -329,21 +329,68 @@ function renderRoutes() {
     `<div class="route"><b>✈️ Flughafen SAW</b><div style="margin-top:3px">🚇 M4 direkt ab Kadıköy (Endstation), knapp 1 Std.</div><div style="margin-top:3px">🚐 Oder Flughafentransfer vom Hotel</div></div>`;
 }
 
-// ---------- Wetter ----------
+// ---------- Wetter (Tagesverlauf) ----------
 const WMO = c => c === 0 ? ["☀️", "Sonnig"] : c <= 2 ? ["🌤️", "Heiter"] : c === 3 ? ["☁️", "Bewölkt"] : c <= 48 ? ["🌫️", "Nebel"] : c <= 57 ? ["🌦️", "Niesel"] : c <= 67 ? ["🌧️", "Regen"] : c <= 77 ? ["🌨️", "Schnee"] : c <= 82 ? ["🌦️", "Schauer"] : ["⛈️", "Gewitter"];
+let WX = null, wxDay = null;
 async function loadWeather() {
   const el = $("weather");
   try {
-    const j = await fetch("https://api.open-meteo.com/v1/forecast?latitude=40.99&longitude=29.03&daily=weathercode,temperature_2m_max,temperature_2m_min,precipitation_probability_max&timezone=Europe%2FIstanbul&forecast_days=16").then(r => r.json()), d = j.daily;
-    const idx = DAYS.map(x => d.time.indexOf(x.date)), rainy = [];
+    WX = await fetch("https://api.open-meteo.com/v1/forecast?latitude=40.99&longitude=29.03&daily=weathercode,temperature_2m_max,temperature_2m_min,precipitation_probability_max,sunrise,sunset&hourly=temperature_2m,precipitation_probability,weathercode,wind_speed_10m&timezone=Europe%2FIstanbul&forecast_days=16").then(r => r.json());
+    const d = WX.daily, idx = DAYS.map(x => d.time.indexOf(x.date)), rainy = [];
     el.innerHTML = DAYS.map((x, k) => { const i = idx[k]; if (i < 0) return `<div class="day trip"><div class="d">${x.tab}</div><div class="ic">❔</div><div class="r">noch keine Prognose</div></div>`;
       const [ic, lab] = WMO(d.weathercode[i]), pr = d.precipitation_probability_max[i]; if (pr >= 50) rainy.push(x.tab);
-      return `<div class="day trip" title="${lab}"><div class="d">${x.tab}</div><div class="ic">${ic}</div><div class="t">${Math.round(d.temperature_2m_min[i])}–${Math.round(d.temperature_2m_max[i])}°</div><div class="r">💧 ${pr}%</div></div>` }).join("");
+      return `<button class="day trip wxbtn" data-wx="${x.date}" title="${lab}"><div class="d">${x.tab}</div><div class="ic">${ic}</div><div class="t">${Math.round(d.temperature_2m_min[i])}–${Math.round(d.temperature_2m_max[i])}°</div><div class="r">💧 ${pr}%</div></button>` }).join("");
+    el.querySelectorAll("[data-wx]").forEach(b => b.onclick = () => { wxDay = b.dataset.wx; renderHourly() });
     const tip = $("wtip");
     if (rainy.includes("Sa 21.") && !rainy.includes("Fr 20.")) tip.textContent = "☔ Samstag sieht nasser aus als Freitag: Tauscht die Tage! Galata & Bosporus am Freitag, die Altstadt (drinnen) am Samstag.";
     else if (rainy.length) tip.textContent = `☔ Regen möglich am ${rainy.join(", ")}. Regenjacke & wasserfeste Schuhe einpacken.`;
     else tip.textContent = "👍 Sieht gut aus, der Plan passt so.";
+    const today = new Date().toLocaleDateString("sv-SE", { timeZone: "Europe/Istanbul" });
+    wxDay = DAYS.find(x => x.date === today && d.time.includes(x.date))?.date || DAYS.find(x => d.time.includes(x.date))?.date || null;
+    renderHourly();
   } catch (e) { el.innerHTML = `<div class="muted">Wetter gerade nicht erreichbar.</div>` }
+}
+function renderHourly() {
+  const box = $("hourly"); if (!WX || !wxDay) { box.innerHTML = '<p class="muted">Der Stundenverlauf erscheint, sobald es für eure Tage eine Prognose gibt (ca. 2 Wochen im Voraus).</p>'; return }
+  document.querySelectorAll("[data-wx]").forEach(b => b.classList.toggle("on", b.dataset.wx === wxDay));
+  const h = WX.hourly, di = WX.daily.time.indexOf(wxDay);
+  const hrs = h.time.map((t, i) => ({ t, i })).filter(x => x.t.startsWith(wxDay) && +x.t.slice(11, 13) >= 7);
+  if (!hrs.length) { box.innerHTML = ""; return }
+  const temps = hrs.map(x => h.temperature_2m[x.i]), mn = Math.min(...temps) - 1, mx = Math.max(...temps) + 1;
+  const W = hrs.length * 52, H = 60, pts = hrs.map((x, k) => `${k * 52 + 26},${H - 8 - (h.temperature_2m[x.i] - mn) / (mx - mn || 1) * (H - 20)}`).join(" ");
+  const label = DAYS.find(x => x.date === wxDay)?.tab || wxDay;
+  box.innerHTML = `<p class="daynote" style="margin:10px 0 4px"><b>${label}</b> · Stunde für Stunde · 🌅 ${WX.daily.sunrise[di].slice(11)} · 🌇 ${WX.daily.sunset[di].slice(11)}</p>
+    <div class="hours"><div style="width:${W}px;position:relative">
+      <svg width="${W}" height="${H}" style="display:block"><polyline points="${pts}" fill="none" stroke="#c8553d" stroke-width="2.5" stroke-linejoin="round"/>
+        ${hrs.map((x, k) => `<circle cx="${k * 52 + 26}" cy="${pts.split(" ")[k].split(",")[1]}" r="3" fill="#c8553d"/>`).join("")}</svg>
+      <div style="display:flex">${hrs.map(x => { const pr = h.precipitation_probability[x.i] ?? 0;
+        return `<div class="hr"><div class="ht">${x.t.slice(11, 13)}h</div><div class="hi">${WMO(h.weathercode[x.i])[0]}</div><div class="hv">${Math.round(h.temperature_2m[x.i])}°</div>
+          <div class="hb"><div style="height:${pr}%"></div></div><div class="hp">${pr}%</div></div>` }).join("")}</div></div></div>
+    <p class="muted" style="margin:4px 0 0">Balken = Regenwahrscheinlichkeit. Tippe oben auf einen Tag.</p>`;
+}
+
+// ---------- Türkisch für unterwegs ----------
+const PHRASES = [
+  ["👋 Basics", [["Hallo", "Merhaba", "mer-ha-ba"], ["Danke", "Teşekkür ederim", "te-schek-kür e-de-rim"], ["Danke (locker)", "Sağ ol", "saa ol"], ["Bitte (bei Bitten)", "Lütfen", "lüt-fen"], ["Ja / Nein", "Evet / Hayır", "e-wet / ha-jer"], ["Entschuldigung", "Affedersiniz", "af-fe-der-si-nis"], ["Guten Morgen", "Günaydın", "gü-naj-den"], ["Guten Abend", "İyi akşamlar", "i-ji ak-scham-lar"], ["Tschüss", "Hoşça kal", "hosch-tscha kal"], ["Ich verstehe nicht", "Anlamıyorum", "an-la-me-jo-rum"], ["Sprechen Sie Englisch?", "İngilizce biliyor musunuz?", "in-gi-lis-dsche bi-li-jor mu-su-nus"]]],
+  ["🍷 Im Restaurant & in der Bar", [["Weisswein", "Beyaz şarap", "be-jas scha-rap"], ["Rotwein", "Kırmızı şarap", "ker-me-se scha-rap"], ["Rosé", "Roze şarap", "ro-se scha-rap"], ["Ein Glas…", "Bir kadeh…", "bir ka-de"], ["Eine Flasche…", "Bir şişe…", "bir schi-sche"], ["Bier", "Bira", "bi-ra"], ["Prost!", "Şerefe!", "sche-re-fe"], ["Wasser (ohne Kohlensäure)", "Su", "su"], ["Mineralwasser", "Maden suyu / Soda", "ma-den su-ju"], ["Tee / Kaffee", "Çay / Kahve", "tschai / kach-we"], ["Die Rechnung, bitte", "Hesap, lütfen", "he-sap lüt-fen"], ["Speisekarte", "Menü", "me-nü"], ["Nicht scharf, bitte", "Acısız, lütfen", "a-dsche-ses lüt-fen"], ["Vegetarisch", "Vejetaryen", "we-sche-tar-jen"], ["Lecker!", "Çok lezzetli!", "tschok les-set-li"], ["Guten Appetit", "Afiyet olsun", "a-fi-jet ol-sun"]]],
+  ["🛍️ Einkaufen & Basar", [["Wie viel kostet das?", "Ne kadar?", "ne ka-dar"], ["Zu teuer", "Çok pahalı", "tschok pa-ha-le"], ["Geht es günstiger?", "İndirim yapar mısınız?", "in-di-rim ja-par me-se-nes"], ["Kann ich mit Karte zahlen?", "Kartla ödeyebilir miyim?", "kart-la ö-de-je-bi-lir mi-jim"], ["Ich schaue nur", "Sadece bakıyorum", "sa-de-dsche ba-ke-jo-rum"]]],
+  ["🚇 Unterwegs", [["Wo ist…?", "… nerede?", "ne-re-de"], ["Toilette", "Tuvalet", "tu-wa-let"], ["Metro / Fähre", "Metro / Vapur", "met-ro / wa-pur"], ["Haltestelle", "Durak", "du-rak"], ["Links / Rechts / Geradeaus", "Sol / Sağ / Düz", "sol / saa / düs"], ["Hilfe!", "İmdat!", "im-dat"]]],
+  ["🔢 Zahlen", [["1 · 2 · 3", "bir · iki · üç", "bir · i-ki · ütsch"], ["4 · 5", "dört · beş", "dört · besch"], ["10 · 100", "on · yüz", "on · jüs"]]]
+];
+function speak(t) { try { const u = new SpeechSynthesisUtterance(t); u.lang = "tr-TR"; u.rate = .85; speechSynthesis.cancel(); speechSynthesis.speak(u) } catch (e) {} }
+function renderPhrases() {
+  const canSpeak = "speechSynthesis" in window;
+  $("phrases").innerHTML = PHRASES.map(([g, list]) => `<div class="route"><b>${g}</b>${list.map(([de, tr, pr]) => `<div class="phr">
+      <div><div class="tr">${esc(tr)}</div><div class="muted">${esc(de)} · <i>${esc(pr)}</i></div></div>
+      ${canSpeak ? `<button class="say" data-say="${esc(tr.replace(/…/g, ""))}" aria-label="Anhören">🔊</button>` : ""}</div>`).join("")}</div>`).join("");
+  $("phrases").querySelectorAll("[data-say]").forEach(b => b.onclick = () => speak(b.dataset.say));
+}
+
+// ---------- Bahnlinien auf der Karte ----------
+let railLayer = null;
+function toggleRail(on) {
+  if (on && !railLayer) railLayer = L.tileLayer("https://{s}.tiles.openrailwaymap.org/standard/{z}/{x}/{y}.png", { maxZoom: 19, opacity: .85, attribution: "Bahnlinien © OpenRailwayMap (CC-BY-SA)" });
+  if (on) railLayer.addTo(map); else if (railLayer) map.removeLayer(railLayer);
 }
 
 // ---------- Packliste ----------
@@ -488,7 +535,8 @@ window.addEventListener("hashchange", admRender);
 async function refreshAll() { if (document.visibilityState !== "visible") return; await pull(); if (!me || (doneV(myVotes) && !curCat)) renderSwipe() }
 (async () => {
   await loadSpots();
-  renderMarkers(); renderTabs(); renderDay(); renderFilters(); renderPlaces(); renderTips(); renderRoutes(); renderPack(); loadWeather();
+  renderMarkers(); renderTabs(); renderDay(); renderFilters(); renderPlaces(); renderTips(); renderRoutes(); renderPack(); renderPhrases(); loadWeather();
+  $("rail").onchange = e => toggleRail(e.target.checked);
   if (db) db.from("packlist").select("groups").eq("trip", TRIP).maybeSingle().then(({ data }) => { if (data?.groups?.length) { PACK = data.groups; renderPack() } });
   await pull(); renderSwipe(); admRender();
   setInterval(refreshAll, 15000);
