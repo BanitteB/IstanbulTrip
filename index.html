@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Istanbul · 19.–22. November</title>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --navy:#0f2a43; --bosporus:#1d5c7a; --tile:#2a9d8f; --terra:#c8553d;
+  --gold:#e0a13a; --sand:#f6f1e7; --card:#fffdf8; --ink:#1d2430; --muted:#6b7380; --line:#e6dfd1;
+}
+*{box-sizing:border-box}
+body{margin:0;font-family:Inter,system-ui,sans-serif;background:var(--sand);color:var(--ink);line-height:1.45}
+header{
+  background:linear-gradient(135deg,var(--navy),var(--bosporus));color:#fff;padding:28px 20px 70px;position:relative;overflow:hidden
+}
+header::after{ /* Fliesenmuster */
+  content:"";position:absolute;inset:0;opacity:.08;
+  background-image:radial-gradient(circle at 50% 50%,#fff 2px,transparent 3px),
+    conic-gradient(from 45deg,#fff 0 25%,transparent 0 50%,#fff 0 75%,transparent 0);
+  background-size:28px 28px,56px 56px;pointer-events:none
+}
+.wrap{max-width:1100px;margin:0 auto;position:relative;z-index:1}
+h1{font-family:Fraunces,serif;font-size:clamp(2rem,6vw,3.2rem);margin:0;letter-spacing:-.5px}
+.sub{opacity:.85;margin-top:4px}
+.countdown{display:inline-block;margin-top:14px;background:rgba(255,255,255,.14);padding:6px 12px;border-radius:999px;font-weight:600;font-size:.9rem}
+main{max-width:1100px;margin:-50px auto 40px;padding:0 14px;display:grid;gap:16px;grid-template-columns:1fr;position:relative;z-index:2}
+@media(min-width:900px){main{grid-template-columns:1.25fr 1fr}.span2{grid-column:1/-1}}
+.card{background:var(--card);border-radius:16px;padding:18px;box-shadow:0 4px 18px rgba(15,42,67,.08);border:1px solid var(--line)}
+.card h2{font-family:Fraunces,serif;font-size:1.3rem;margin:0 0 12px;display:flex;align-items:center;gap:8px}
+.muted{color:var(--muted);font-size:.85rem}
+
+/* Wetter */
+.weather{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
+.day{background:var(--sand);border-radius:12px;padding:10px 6px;text-align:center}
+.day.trip{outline:2px solid var(--tile)}
+.day .d{font-weight:600;font-size:.85rem}
+.day .ic{font-size:1.8rem;margin:4px 0}
+.day .t{font-weight:600}
+.day .r{font-size:.78rem;color:var(--bosporus)}
+.wtip{margin-top:10px;font-size:.88rem;background:#eaf5f3;border-left:3px solid var(--tile);padding:8px 10px;border-radius:6px}
+
+/* Tabs */
+.tabs{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px}
+.tab{border:1px solid var(--line);background:#fff;border-radius:999px;padding:7px 14px;font:inherit;font-weight:600;font-size:.88rem;cursor:pointer;color:var(--ink)}
+.tab.on{background:var(--navy);color:#fff;border-color:var(--navy)}
+.daytitle{font-weight:600;margin:0 0 4px}
+.daynote{font-size:.85rem;color:var(--muted);margin:0 0 10px}
+.stop{display:flex;gap:10px;padding:10px 0;border-top:1px dashed var(--line);align-items:flex-start}
+.stop input{margin-top:4px;accent-color:var(--tile);width:18px;height:18px;flex:none}
+.stop .time{flex:none;width:62px;font-size:.78rem;font-weight:600;color:var(--terra);padding-top:3px}
+.stop .name{font-weight:600;cursor:pointer}
+.stop .name:hover{color:var(--bosporus)}
+.stop .info{font-size:.84rem;color:var(--muted)}
+.stop .go{font-size:.8rem;color:var(--bosporus);margin-top:2px}
+.stop.done .name{text-decoration:line-through;opacity:.55}
+
+/* Karte */
+#map{height:420px;border-radius:12px;border:1px solid var(--line)}
+.legend{display:flex;gap:12px;flex-wrap:wrap;margin-top:8px;font-size:.8rem}
+.legend span::before{content:"";display:inline-block;width:10px;height:10px;border-radius:50%;margin-right:5px;background:var(--c)}
+
+/* Lieblingsorte */
+.filters{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px}
+.places{display:grid;gap:8px;grid-template-columns:repeat(auto-fill,minmax(230px,1fr))}
+.place{border:1px solid var(--line);border-radius:12px;padding:10px 12px;background:#fff;display:flex;gap:8px}
+.place .body{flex:1}
+.place .pn{font-weight:600;cursor:pointer}
+.place .pd{font-size:.82rem;color:var(--muted)}
+.tag{display:inline-block;font-size:.7rem;font-weight:600;padding:1px 7px;border-radius:999px;color:#fff;background:var(--c);margin-top:4px}
+.heart{border:0;background:none;font-size:1.3rem;cursor:pointer;line-height:1;padding:0;align-self:flex-start}
+.empty{font-size:.88rem;color:var(--muted);padding:8px 0}
+
+/* Transport */
+.routes{display:grid;gap:6px;grid-template-columns:repeat(auto-fill,minmax(250px,1fr))}
+.route{background:var(--sand);border-radius:10px;padding:8px 10px;font-size:.86rem}
+.route b{display:block}
+footer{text-align:center;color:var(--muted);font-size:.78rem;padding:10px 0 30px}
+</style>
+</head>
+<body>
+<header>
+  <div class="wrap">
+    <div class="sub">🇹🇷 Reise-Dashboard</div>
+    <h1>Istanbul</h1>
+    <div class="sub">Do 19. – So 22. November 2026 · Otel Kadıköy</div>
+    <div class="countdown" id="countdown"></div>
+  </div>
+</header>
+
+<main>
+  <section class="card">
+    <h2>📅 Plan</h2>
+    <div class="tabs" id="tabs"></div>
+    <div id="daypanel"></div>
+  </section>
+
+  <section class="card">
+    <h2>🌤️ Wetter in Kadıköy</h2>
+    <div class="weather" id="weather"><div class="muted">Lade Prognose…</div></div>
+    <div class="wtip" id="wtip">Regen? Dann Freitag und Samstag tauschen: Die Altstadt-Tour ist fast komplett drinnen.</div>
+    <p class="muted" style="margin:8px 0 0">Daten: Open-Meteo, live beim Öffnen der Seite</p>
+  </section>
+
+  <section class="card span2">
+    <h2>🗺️ Karte</h2>
+    <div id="map"></div>
+    <div class="legend" id="legend"></div>
+  </section>
+
+  <section class="card span2">
+    <h2>❤️ Lieblingsorte</h2>
+    <div class="filters" id="filters"></div>
+    <div class="places" id="places"></div>
+  </section>
+
+  <section class="card span2">
+    <h2>🚋 So kommt ihr hin (ab Hotel)</h2>
+    <div class="routes">
+      <div class="route"><b>Sultanahmet / Hagia Sophia</b>Fähre nach Eminönü, dann T1 zwei Stationen</div>
+      <div class="route"><b>Grosser Basar</b>Fähre nach Eminönü, T1 bis Beyazıt-Kapalıçarşı</div>
+      <div class="route"><b>Galata / Karaköy</b>Fähre direkt nach Karaköy</div>
+      <div class="route"><b>Taksim / İstiklal</b>Fähre nach Karaköy, dann F2 Tünel hoch</div>
+      <div class="route"><b>Beşiktaş / Ortaköy</b>Fähre nach Beşiktaş, Bus ca. 10 Min. nach Ortaköy</div>
+      <div class="route"><b>Merter</b>M4 → Ayrılık Çeşmesi → Marmaray bis Yenikapı → M1A</div>
+      <div class="route"><b>Üsküdar / Zipline</b>M4 → Ayrılık Çeşmesi → Marmaray eine Station</div>
+      <div class="route"><b>Flughafen SAW</b>M4 direkt ab Kadıköy, knapp 1 Std.</div>
+    </div>
+    <p class="muted" style="margin:10px 0 0">Alles mit der Istanbulkart-App. Sonnenuntergang ca. 16:40.</p>
+  </section>
+</main>
+<footer>Gute Reise! ✈️ Häkchen und Herzen werden auf diesem Gerät gespeichert.</footer>
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script>
+// ---------- Daten ----------
+const CATS = {
+  hotel:{label:"Hotel",c:"#0f2a43"},
+  sight:{label:"Sehenswert",c:"#1d5c7a"},
+  shop:{label:"Shopping",c:"#c8553d"},
+  food:{label:"Café & Drinks",c:"#e0a13a"},
+  extra:{label:"Wenn Zeit bleibt",c:"#2a9d8f"}
+};
+const PLACES = {
+  hotel:{n:"Otel Kadıköy",cat:"hotel",ll:[40.9905,29.0275],d:"Uzun Hafız Sk. 18 · 5 Min. zur Fähre"},
+  iskele:{n:"Fähre Kadıköy",cat:"hotel",ll:[40.9925,29.0230],d:"Fähren nach Eminönü, Karaköy, Beşiktaş"},
+  wizards:{n:"Wizards Coffee House",cat:"food",ll:[40.9893,29.0262],d:"Harry-Potter-Café, täglich 10–23 Uhr, Desserts top"},
+  shine:{n:"Shine Terrace",cat:"food",ll:[40.9898,29.0255],d:"Abend-Drink in Kadıköy (Lage ungefähr)"},
+  moda:{n:"Moda",cat:"food",ll:[40.9800,29.0262],d:"Frühstück im schönsten Viertel von Kadıköy"},
+  merter:{n:"Merter",cat:"shop",ll:[41.0080,28.8940],d:"Shopping am Vormittag"},
+  bazaar:{n:"Grosser Basar",cat:"shop",ll:[41.0107,28.9681],d:"Lampen, Teppiche, überdacht"},
+  bluemosque:{n:"Blaue Moschee",cat:"sight",ll:[41.0054,28.9768],d:"Freitag erst nachmittags (Freitagsgebet)"},
+  cistern:{n:"Basilika-Zisterne",cat:"sight",ll:[41.0084,28.9779],d:"Unterirdisch, perfekt bei Regen"},
+  hagia:{n:"Hagia Sophia",cat:"sight",ll:[41.0086,28.9802],d:"Entweder Hagia Sophia oder Topkapı"},
+  topkapi:{n:"Topkapı-Palast",cat:"sight",ll:[41.0115,28.9834],d:"2–3 Std. einplanen"},
+  dirihan:{n:"Diri Han",cat:"sight",ll:[41.0140,28.9745],d:"Versteckter Innenhof mit Pflanzen, Hocahanı Sk."},
+  spice:{n:"Gewürzbasar",cat:"shop",ll:[41.0166,28.9706],d:"Direkt am Fähranleger Eminönü"},
+  salt:{n:"SALT Galata",cat:"sight",ll:[41.0237,28.9744],d:"Schöne Architektur, Bankalar Cad."},
+  galata:{n:"Galataturm",cat:"sight",ll:[41.0256,28.9742],d:"Aussicht über die Altstadt"},
+  misir:{n:"Mısır Apartmanı",cat:"sight",ll:[41.0337,28.9790],d:"Jugendstilhaus an der İstiklal"},
+  taksim:{n:"Taksim & İstiklal",cat:"shop",ll:[41.0369,28.9850],d:"Rote Nostalgie-Tram, Shopping"},
+  ortakoy:{n:"Ortaköy-Moschee",cat:"sight",ll:[41.0473,29.0270],d:"Sonnenuntergang mit Brückenblick"},
+  rooftop:{n:"Rooftop Karaköy",cat:"food",ll:[41.0225,28.9775],d:"Roof106 oder Opaque (Lage ungefähr)"},
+  zipline:{n:"Zipline Bosporus",cat:"extra",ll:[41.0360,29.0330],d:"Nakkaştepe, ab ca. 19 €, online buchen"},
+  panorama:{n:"Panorama 1453",cat:"extra",ll:[41.0195,28.9230],d:"360°-Rundgemälde, nah bei Merter"},
+  camlica:{n:"Çamlıca-Moschee",cat:"extra",ll:[41.0270,29.0690],d:"Auf eurer Seite, Do oder So"},
+  balat:{n:"Balat + Feshane",cat:"extra",ll:[41.0297,28.9490],d:"Bunte Häuser, braucht einen halben Tag"}
+};
+const DAYS = [
+  {key:"do",tab:"Do 19.",date:"2026-11-19",title:"Ankunft & Kadıköy",note:"Locker ankommen, das Viertel erkunden.",stops:[
+    {t:"Ankunft",p:"hotel",info:"Einchecken"},
+    {t:"Abend",p:"wizards",info:"Gleich ums Eck vom Hotel"},
+    {t:"Optional",p:"camlica",info:"Falls ihr früh landet"}]},
+  {key:"fr",tab:"Fr 20.",date:"2026-11-20",title:"Merter + Altstadt",note:"Geht auch bei Regen, fast alles drinnen.",stops:[
+    {t:"Vormittag",p:"merter",info:"Shopping",go:"M4 → Marmaray → M1A"},
+    {t:"Mittag",p:"bazaar",info:"Überdacht, Lampen & Teppiche",go:"M1A Zeytinburnu → T1"},
+    {t:"Nachmittag",p:"bluemosque",info:"Erst nach dem Freitagsgebet"},
+    {t:"",p:"cistern",info:"Gleich gegenüber"},
+    {t:"",p:"hagia",info:"Oder stattdessen Topkapı"},
+    {t:"",p:"dirihan",info:"Auf dem Weg nach Eminönü"},
+    {t:"Spätnachm.",p:"spice",info:"Dann Fähre zurück nach Kadıköy"},
+    {t:"Abend",p:"shine",info:"Drink in Kadıköy"}]},
+  {key:"sa",tab:"Sa 21.",date:"2026-11-21",title:"Galata, Taksim, Bosporus",note:"Am schönsten bei trockenem Wetter.",stops:[
+    {t:"Morgen",p:"moda",info:"Frühstück, dann Fähre nach Karaköy"},
+    {t:"Vormittag",p:"salt",info:"Gleich nach der Fähre"},
+    {t:"",p:"galata",info:"Bergauf zu Fuss"},
+    {t:"Mittag",p:"misir",info:"An der İstiklal"},
+    {t:"",p:"taksim",info:"Mit der roten Tram",go:"Zurück: F2 Tünel nach Karaköy"},
+    {t:"16:40",p:"ortakoy",info:"Sonnenuntergang (oder Sunset-Cruise)",go:"Bus ab Beşiktaş ca. 10 Min."},
+    {t:"Abend",p:"rooftop",info:"Drinks & Abendessen, dann Fähre heim"}]},
+  {key:"so",tab:"So 22.",date:"2026-11-22",title:"Abreise",note:"Flugzeit eintragen, dann passt der Rest.",stops:[
+    {t:"Vormittag",p:"wizards",info:"Falls am Donnerstag nicht geschafft"},
+    {t:"Optional",p:"zipline",info:"Ab ca. 12 Uhr, bei Wind prüfen"},
+    {t:"Abflug",p:"iskele",info:"SAW: M4 direkt, knapp 1 Std."}]}
+];
+
+// ---------- Speicher (nur dieses Gerät) ----------
+const store = {
+  get(k,def){try{return JSON.parse(localStorage.getItem(k))??def}catch(e){return def}},
+  set(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}}
+};
+let done = store.get("ist-done",{});
+let favs = store.get("ist-favs",["wizards","dirihan","ortakoy","galata"]);
+
+// ---------- Countdown ----------
+(function(){
+  const start=new Date("2026-11-19T00:00:00+03:00"), end=new Date("2026-11-23T00:00:00+03:00"), now=new Date();
+  const el=document.getElementById("countdown");
+  if(now<start){const d=Math.ceil((start-now)/864e5);el.textContent=`Noch ${d} ${d===1?"Tag":"Tage"} ✈️`}
+  else if(now<end){el.textContent="Ihr seid da! 🎉"}
+  else el.textContent="Schön war's 💙";
+})();
+
+// ---------- Karte ----------
+const map=L.map("map",{scrollWheelZoom:false}).setView([41.012,28.99],12);
+L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",{maxZoom:19,attribution:"© OpenStreetMap"}).addTo(map);
+const markers={};
+for(const [id,p] of Object.entries(PLACES)){
+  const c=CATS[p.cat].c;
+  markers[id]=L.circleMarker(p.ll,{radius:id==="hotel"?10:7,color:"#fff",weight:2,fillColor:c,fillOpacity:1})
+    .addTo(map).bindPopup(`<b>${p.n}</b><br><span style="color:#6b7380">${p.d}</span><br><a target="_blank" href="https://www.google.com/maps/dir/?api=1&destination=${p.ll[0]},${p.ll[1]}&travelmode=transit">Route in Google Maps ↗</a>`);
+}
+let routeLine=null;
+function showDayOnMap(day){
+  if(routeLine) map.removeLayer(routeLine);
+  const pts=day.stops.map(s=>PLACES[s.p].ll);
+  routeLine=L.polyline(pts,{color:"#c8553d",weight:3,dashArray:"6 6"}).addTo(map);
+  map.fitBounds(L.latLngBounds(pts).pad(.25));
+}
+function focusPlace(id){
+  map.setView(PLACES[id].ll,15);markers[id].openPopup();
+  document.getElementById("map").scrollIntoView({behavior:"smooth",block:"center"});
+}
+document.getElementById("legend").innerHTML=Object.values(CATS).map(c=>`<span style="--c:${c.c}">${c.label}</span>`).join("");
+
+// ---------- Plan ----------
+let curDay = (()=>{const t=new Date().toLocaleDateString("sv-SE",{timeZone:"Europe/Istanbul"});const i=DAYS.findIndex(d=>d.date===t);return i<0?1:i})();
+function renderTabs(){
+  document.getElementById("tabs").innerHTML=DAYS.map((d,i)=>`<button class="tab ${i===curDay?"on":""}" data-i="${i}">${d.tab}</button>`).join("");
+}
+function renderDay(){
+  const d=DAYS[curDay];
+  document.getElementById("daypanel").innerHTML=`<p class="daytitle">${d.title}</p><p class="daynote">${d.note}</p>`+
+    d.stops.map((s,i)=>{const k=d.key+i,p=PLACES[s.p];return `<div class="stop ${done[k]?"done":""}">
+      <input type="checkbox" data-k="${k}" ${done[k]?"checked":""} aria-label="erledigt">
+      <div class="time">${s.t}</div>
+      <div><div class="name" data-p="${s.p}">${p.n}</div><div class="info">${s.info}</div>${s.go?`<div class="go">🚋 ${s.go}</div>`:""}</div></div>`}).join("");
+  showDayOnMap(d);
+}
+document.getElementById("tabs").onclick=e=>{const b=e.target.closest(".tab");if(!b)return;curDay=+b.dataset.i;renderTabs();renderDay()};
+document.getElementById("daypanel").onclick=e=>{
+  const cb=e.target.closest("input");if(cb){done[cb.dataset.k]=cb.checked;store.set("ist-done",done);renderDay();return}
+  const n=e.target.closest(".name");if(n)focusPlace(n.dataset.p);
+};
+
+// ---------- Lieblingsorte ----------
+let filter="fav";
+function renderFilters(){
+  const opts=[["fav","❤️ Favoriten"],["all","Alle"],...Object.entries(CATS).filter(([k])=>k!=="hotel").map(([k,c])=>[k,c.label])];
+  document.getElementById("filters").innerHTML=opts.map(([k,l])=>`<button class="tab ${filter===k?"on":""}" data-f="${k}">${l}</button>`).join("");
+}
+function renderPlaces(){
+  const list=Object.entries(PLACES).filter(([id,p])=>p.cat!=="hotel"&&(filter==="all"||(filter==="fav"?favs.includes(id):p.cat===filter)));
+  document.getElementById("places").innerHTML=list.length?list.map(([id,p])=>`<div class="place">
+    <div class="body"><div class="pn" data-p="${id}">${p.n}</div><div class="pd">${p.d}</div><span class="tag" style="--c:${CATS[p.cat].c}">${CATS[p.cat].label}</span></div>
+    <button class="heart" data-h="${id}" aria-label="Favorit">${favs.includes(id)?"❤️":"🤍"}</button></div>`).join("")
+    :`<div class="empty">Noch keine Favoriten. Tippe bei „Alle“ auf ein Herz 🤍</div>`;
+}
+document.getElementById("filters").onclick=e=>{const b=e.target.closest(".tab");if(!b)return;filter=b.dataset.f;renderFilters();renderPlaces()};
+document.getElementById("places").onclick=e=>{
+  const h=e.target.closest(".heart");
+  if(h){const id=h.dataset.h;favs=favs.includes(id)?favs.filter(x=>x!==id):[...favs,id];store.set("ist-favs",favs);renderPlaces();return}
+  const n=e.target.closest(".pn");if(n)focusPlace(n.dataset.p);
+};
+
+// ---------- Wetter (Open-Meteo) ----------
+const WMO=c=>c===0?["☀️","Sonnig"]:c<=2?["🌤️","Heiter"]:c===3?["☁️","Bewölkt"]:c<=48?["🌫️","Nebel"]:c<=57?["🌦️","Niesel"]:c<=67?["🌧️","Regen"]:c<=77?["🌨️","Schnee"]:c<=82?["🌦️","Schauer"]:["⛈️","Gewitter"];
+async function loadWeather(){
+  const el=document.getElementById("weather");
+  try{
+    const r=await fetch("https://api.open-meteo.com/v1/forecast?latitude=40.99&longitude=29.03&daily=weathercode,temperature_2m_max,temperature_2m_min,precipitation_probability_max&timezone=Europe%2FIstanbul&forecast_days=16");
+    const j=await r.json(),d=j.daily;
+    const trip=DAYS.map(x=>x.date), idx=trip.map(t=>d.time.indexOf(t));
+    let cards, rainy=[];
+    if(idx.some(i=>i>=0)){
+      cards=DAYS.map((x,k)=>{const i=idx[k];if(i<0)return `<div class="day trip"><div class="d">${x.tab}</div><div class="ic">❔</div><div class="r">noch keine Prognose</div></div>`;
+        const [ic,lab]=WMO(d.weathercode[i]),pr=d.precipitation_probability_max[i];if(pr>=50)rainy.push(x.tab);
+        return `<div class="day trip" title="${lab}"><div class="d">${x.tab}</div><div class="ic">${ic}</div><div class="t">${Math.round(d.temperature_2m_min[i])}–${Math.round(d.temperature_2m_max[i])}°</div><div class="r">💧 ${pr}%</div></div>`}).join("");
+    } else {
+      cards=d.time.slice(0,4).map((t,i)=>{const [ic]=WMO(d.weathercode[i]);const wd=new Date(t+"T12:00").toLocaleDateString("de",{weekday:"short",day:"numeric"});
+        return `<div class="day"><div class="d">${wd}</div><div class="ic">${ic}</div><div class="t">${Math.round(d.temperature_2m_min[i])}–${Math.round(d.temperature_2m_max[i])}°</div><div class="r">💧 ${d.precipitation_probability_max[i]}%</div></div>`}).join("");
+    }
+    el.innerHTML=cards;
+    const tip=document.getElementById("wtip");
+    if(rainy.includes("Sa 21.")&&!rainy.includes("Fr 20.")) tip.textContent="☔ Samstag sieht nasser aus als Freitag: Tauscht die Tage! Galata & Bosporus am Freitag, Merter + Altstadt (drinnen) am Samstag.";
+    else if(rainy.length) tip.textContent=`☔ Regen möglich am ${rainy.join(", ")}. Regenjacke & wasserfeste Schuhe einpacken.`;
+    else if(idx.some(i=>i>=0)) tip.textContent="👍 Sieht gut aus, der Plan passt so.";
+  }catch(e){el.innerHTML=`<div class="muted">Wetter gerade nicht erreichbar.</div>`}
+}
+
+renderTabs();renderDay();renderFilters();renderPlaces();loadWeather();
+</script>
+</body>
+</html>
