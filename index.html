@@ -15,14 +15,9 @@
 *{box-sizing:border-box}
 body{margin:0;font-family:Inter,system-ui,sans-serif;background:var(--sand);color:var(--ink);line-height:1.45}
 header{
-  background:linear-gradient(135deg,var(--navy),var(--bosporus));color:#fff;padding:28px 20px 70px;position:relative;overflow:hidden
+  background:linear-gradient(170deg,#0f2a43 0%,#1d5c7a 55%,#c9805a 100%);color:#fff;padding:28px 20px 90px;position:relative;overflow:hidden
 }
-header::after{ /* Fliesenmuster */
-  content:"";position:absolute;inset:0;opacity:.08;
-  background-image:radial-gradient(circle at 50% 50%,#fff 2px,transparent 3px),
-    conic-gradient(from 45deg,#fff 0 25%,transparent 0 50%,#fff 0 75%,transparent 0);
-  background-size:28px 28px,56px 56px;pointer-events:none
-}
+.skyline{position:absolute;left:0;right:0;bottom:0;width:100%;height:110px;pointer-events:none}
 .wrap{max-width:1100px;margin:0 auto;position:relative;z-index:1}
 h1{font-family:Fraunces,serif;font-size:clamp(2rem,6vw,3.2rem);margin:0;letter-spacing:-.5px}
 .sub{opacity:.85;margin-top:4px}
@@ -121,6 +116,31 @@ footer{text-align:center;color:var(--muted);font-size:.78rem;padding:10px 0 30px
     <div class="sub">Do 19. – So 22. November 2026 · Otel Kadıköy</div>
     <div class="countdown" id="countdown"></div>
   </div>
+  <svg class="skyline" viewBox="0 0 1200 110" preserveAspectRatio="xMidYMax slice" aria-hidden="true">
+    <g fill="#0f2a43" opacity=".55">
+      <!-- Moschee links -->
+      <rect x="150" y="18" width="7" height="92"/><polygon points="149,18 153.5,0 158,18"/>
+      <rect x="185" y="30" width="6" height="80"/><polygon points="184,30 188,12 192,30"/>
+      <path d="M200 110 V78 Q235 52 270 78 V110Z"/><path d="M240 110 V70 Q300 8 360 70 V110Z"/><path d="M330 110 V78 Q365 52 400 78 V110Z"/>
+      <rect x="297" y="2" width="5" height="12"/>
+      <rect x="410" y="30" width="6" height="80"/><polygon points="409,30 413,12 417,30"/>
+      <rect x="445" y="18" width="7" height="92"/><polygon points="444,18 448.5,0 453,18"/>
+      <!-- Häuser -->
+      <rect x="470" y="80" width="40" height="30"/><rect x="515" y="72" width="30" height="38"/><rect x="550" y="84" width="45" height="26"/>
+      <!-- Galataturm -->
+      <rect x="610" y="40" width="34" height="70"/><rect x="606" y="34" width="42" height="8"/><polygon points="604,34 627,0 650,34"/>
+      <rect x="660" y="78" width="38" height="32"/><rect x="702" y="86" width="30" height="24"/>
+      <!-- Moschee rechts -->
+      <rect x="760" y="34" width="5" height="76"/><polygon points="759,34 762.5,16 766,34"/>
+      <path d="M775 110 V82 Q800 64 825 82 V110Z"/><path d="M805 110 V76 Q850 30 895 76 V110Z"/><path d="M875 110 V82 Q900 64 925 82 V110Z"/>
+      <rect x="935" y="34" width="5" height="76"/><polygon points="934,34 937.5,16 941,34"/>
+      <rect x="960" y="88" width="50" height="22"/><rect x="1015" y="80" width="30" height="30"/>
+      <!-- Brücke -->
+      <rect x="1050" y="96" width="150" height="4"/><rect x="1080" y="60" width="4" height="50"/><rect x="1170" y="60" width="4" height="50"/>
+      <path d="M1050 96 Q1082 62 1082 62 Q1127 90 1172 62 Q1200 80 1200 80" stroke="#0f2a43" stroke-width="2" fill="none"/>
+      <rect x="0" y="104" width="1200" height="6"/>
+    </g>
+  </svg>
 </header>
 
 <main>
@@ -152,6 +172,11 @@ footer{text-align:center;color:var(--muted);font-size:.78rem;padding:10px 0 30px
     <h2>❤️ Lieblingsorte</h2>
     <div class="filters" id="filters"></div>
     <div class="places" id="places"></div>
+  </section>
+
+  <section class="card span2">
+    <h2>🧳 Packliste</h2>
+    <div id="pack"></div>
   </section>
 
   <section class="card span2">
@@ -199,6 +224,7 @@ const CATS = {
 const PLACES = {
   hotel:{n:"Otel Kadıköy",cat:"hotel",ll:[40.9905,29.0275],d:"Uzun Hafız Sk. 18 · 5 Min. zur Fähre"},
   iskele:{n:"Fähre Kadıköy",cat:"hotel",ll:[40.9925,29.0230],d:"Fähren nach Eminönü, Karaköy, Beşiktaş"},
+  saw:{n:"Flughafen Sabiha Gökçen (SAW)",cat:"hotel",ll:[40.8986,29.3092],d:"M4 direkt bis Kadıköy, knapp 1 Std."},
   wizards:{n:"Wizards Coffee House",cat:"food",ll:[40.9893,29.0262],d:"Harry-Potter-Café, täglich 10–23 Uhr, Desserts top"},
   shine:{n:"Shine Terrace",cat:"food",ll:[40.9898,29.0255],d:"Abend-Drink in Kadıköy (Lage ungefähr)"},
   moda:{n:"Moda",cat:"food",ll:[40.9800,29.0262],d:"Frühstück im schönsten Viertel von Kadıköy"},
@@ -231,35 +257,29 @@ const PLACES = {
   balikci:{n:"Tarihi Karaköy Balıkçısı",cat:"tipp",ll:[41.0225,28.9760],d:"Winziges Fischlokal im Han, ca. 12:30 da sein (Lage ungefähr)"},
   ferrytour:{n:"Öffentliche Bosporus-Tour",cat:"tipp",ll:[41.0172,28.9735],d:"Şehir Hatları ab Eminönü, viel günstiger als private Cruises"}
 };
+const TRAVELERS=["Valä","Cha","Bettä"];
 const DAYS = [
-  {key:"do",tab:"Do 19.",date:"2026-11-19",title:"Ankunft & Kadıköy",note:"✈️ ZRH → SAW 10:50–15:45 (PC948) · BJV → SAW 16:25–17:45 (PC2249). Check-in ab 14 Uhr.",stops:[
-    {t:"15:45",p:"iskele",info:"Zürich-Gruppe landet, M4 direkt bis Kadıköy (knapp 1 Std.)",go:"Oder Hotel-Flughafentransfer"},
-    {t:"ca. 17:00",p:"hotel",info:"Einchecken, Kadıköy erkunden"},
-    {t:"17:45",p:"iskele",info:"Bodrum-Flug landet, ca. 19 Uhr im Hotel"},
-    {t:"19:30",p:"ciya",info:"Gemeinsames Abendessen um die Ecke"},
-    {t:"Danach",p:"wizards",info:"Dessert im Harry-Potter-Café (bis 23 Uhr)"}]},
-  {key:"fr",tab:"Fr 20.",date:"2026-11-20",title:"Altstadt",note:"Geht auch bei Regen, fast alles drinnen.",stops:[
-    {t:"Morgen",p:"spice",info:"Fähre nach Eminönü, direkt am Gewürzbasar",go:"Fähre ab Kadıköy ca. 20 Min."},
-    {t:"Vormittag",p:"bazaar",info:"Überdacht, Lampen & Teppiche",go:"T1 bis Beyazıt-Kapalıçarşı"},
-    {t:"Mittag",p:"hagia",info:"Oder stattdessen Topkapı"},
-    {t:"",p:"cistern",info:"Gleich gegenüber"},
-    {t:"Nachmittag",p:"bluemosque",info:"Erst nach dem Freitagsgebet"},
-    {t:"",p:"dirihan",info:"Auf dem Weg zurück nach Eminönü"},
-    {t:"Abend",p:"shine",info:"Fähre heim, Drink in Kadıköy"}]},
-  {key:"sa",tab:"Sa 21.",date:"2026-11-21",title:"Galata, Taksim, Bosporus",note:"Am schönsten bei trockenem Wetter.",stops:[
-    {t:"Morgen",p:"moda",info:"Frühstück, dann Fähre nach Karaköy"},
-    {t:"Vormittag",p:"salt",info:"Gleich nach der Fähre"},
-    {t:"",p:"galata",info:"Bergauf zu Fuss"},
-    {t:"Mittag",p:"misir",info:"An der İstiklal"},
-    {t:"",p:"taksim",info:"Mit der roten Tram",go:"Zurück: F2 Tünel nach Karaköy"},
-    {t:"16:40",p:"ortakoy",info:"Sonnenuntergang + Kumpir (oder Bosporus-Tour)",go:"Bus ab Beşiktaş ca. 10 Min."},
-    {t:"Abend",p:"rooftop",info:"Drinks & Abendessen, dann Fähre heim"}]},
-  {key:"so",tab:"So 22.",date:"2026-11-22",title:"Abreise",note:"✈️ SAW → BJV 13:55 (PC2248) · SAW → Basel 15:00 (AJet VF105). Check-out bis 12 Uhr.",stops:[
-    {t:"Morgen",p:"moda",info:"Letztes Frühstück am Meer"},
-    {t:"",p:"baylan",info:"Kup Griye zum Abschied (oder Wizards)"},
-    {t:"11:30",p:"hotel",info:"Check-out, Bodrum-Flug: spätestens jetzt los"},
-    {t:"12:00",p:"iskele",info:"Basel-Flug: M4 direkt zum SAW, knapp 1 Std."}]}
+  {key:"do",tab:"Do 19.",date:"2026-11-19",title:"Ankunft & Kadıköy",note:"✈️ ZRH → SAW 10:50–15:45 (PC948) · BJV → SAW 16:25–17:45 (PC2249). Check-in ab 14 Uhr.",
+   start:[{t:"15:45",p:"saw",info:"Zürich-Flug landet, mit der M4 bis Kadıköy",go:"Oder Hotel-Flughafentransfer"},
+          {t:"ca. 17:00",p:"hotel",info:"Einchecken"},
+          {t:"17:45",p:"saw",info:"Bodrum-Flug landet, ca. 19 Uhr im Hotel"}],
+   end:[], max:3, fill:"Abend"},
+  {key:"fr",tab:"Fr 20.",date:"2026-11-20",title:"Altstadt",note:"Geht auch bei Regen, fast alles drinnen. Blaue Moschee erst nach dem Freitagsgebet.",start:[],end:[],max:8},
+  {key:"sa",tab:"Sa 21.",date:"2026-11-21",title:"Galata, Taksim, Bosporus",note:"Am schönsten bei trockenem Wetter. Sonnenuntergang ca. 16:40.",start:[],end:[],max:8},
+  {key:"so",tab:"So 22.",date:"2026-11-22",title:"Abreise",note:"✈️ SAW → BJV 13:55 (PC2248) · SAW → Basel 15:00 (AJet VF105). Check-out bis 12 Uhr.",
+   start:[],
+   end:[{t:"11:30",p:"hotel",info:"Check-out. Bodrum-Flug: spätestens jetzt los"},
+        {t:"12:00",p:"saw",info:"Basel-Flug: M4 direkt zum SAW, knapp 1 Std."}],
+   max:2, fill:"Morgen"}
 ];
+// Welcher Ort an welchem Tag, in Routen-Reihenfolge
+const SLOT={
+  ciya:["do",1],wizards:["do",2],akmar:["do",3],
+  panorama:["fr",0],bazaar:["fr",1],cemberlitas:["fr",2],hagia:["fr",3],topkapi:["fr",4],cistern:["fr",5],bluemosque:["fr",6],dirihan:["fr",7],spice:["fr",8],shine:["fr",9],
+  moda:["sa",0],ist_modern:["sa",1],kilicali:["sa",2],salt:["sa",3],balikci:["sa",4],galata:["sa",5],misir:["sa",6],taksim:["sa",7],ferrytour:["sa",8],ortakoy:["sa",9],rooftop:["sa",10],
+  baylan:["so",1],aliusta:["so",2],modacoast:["so",3],
+  kuzguncuk:["x",0],zipline:["x",1],camlica:["x",2],balat:["x",3]
+};
 
 // ---------- Speicher (nur dieses Gerät) ----------
 const store = {
@@ -288,9 +308,10 @@ for(const [id,p] of Object.entries(PLACES)){
     .addTo(map).bindPopup(`<b>${p.n}</b><br><span style="color:#6b7380">${p.d}</span><br><a target="_blank" href="https://www.google.com/maps/dir/?api=1&destination=${p.ll[0]},${p.ll[1]}&travelmode=transit">Route in Google Maps ↗</a>`);
 }
 let routeLine=null;
-function showDayOnMap(day){
+function showDayOnMap(stops){
   if(routeLine) map.removeLayer(routeLine);
-  const pts=day.stops.map(s=>PLACES[s.p].ll);
+  const pts=stops.filter(s=>s.p!=="saw").map(s=>PLACES[s.p].ll);
+  if(!pts.length){map.setView([41.012,28.99],12);return}
   routeLine=L.polyline(pts,{color:"#c8553d",weight:3,dashArray:"6 6"}).addTo(map);
   map.fitBounds(L.latLngBounds(pts).pad(.25));
 }
@@ -302,17 +323,25 @@ document.getElementById("legend").innerHTML=Object.values(CATS).map(c=>`<span st
 
 // ---------- Plan ----------
 let curDay = (()=>{const t=new Date().toLocaleDateString("sv-SE",{timeZone:"Europe/Istanbul"});const i=DAYS.findIndex(d=>d.date===t);return i<0?1:i})();
+let planResult=null; // wird vom Swipen gefüllt, sobald alle fertig sind
+function dayStops(d){
+  const mid=planResult?(planResult.days[d.key]||[]).map((r,i)=>({t:i===0&&d.fill?d.fill:"",p:r.id,info:PLACES[r.id].d+(r.star?" ⭐":"")})):[];
+  return [...d.start,...mid,...d.end];
+}
 function renderTabs(){
   document.getElementById("tabs").innerHTML=DAYS.map((d,i)=>`<button class="tab ${i===curDay?"on":""}" data-i="${i}">${d.tab}</button>`).join("");
 }
 function renderDay(){
-  const d=DAYS[curDay];
+  const d=DAYS[curDay],stops=dayStops(d);
+  const locked=!planResult?`<div class="wtip" style="margin:10px 0">🔒 Das Programm entsteht, sobald ${TRAVELERS.join(", ")} geswipt haben. <a href="#swipe-card">Zum Swipen ↓</a></div>`:"";
+  const extra=planResult&&curDay===DAYS.length-1&&planResult.extra.length?`<div class="wtip" style="margin-top:10px">✨ Wenn Zeit bleibt: ${planResult.extra.map(r=>PLACES[r.id].n).join(", ")}</div>`:"";
   document.getElementById("daypanel").innerHTML=`<p class="daytitle">${d.title}</p><p class="daynote">${d.note}</p>`+
-    d.stops.map((s,i)=>{const k=d.key+i,p=PLACES[s.p];return `<div class="stop ${done[k]?"done":""}">
+    stops.map(s=>{const k=d.key+"-"+s.p+"-"+s.t,p=PLACES[s.p];return `<div class="stop ${done[k]?"done":""}">
       <input type="checkbox" data-k="${k}" ${done[k]?"checked":""} aria-label="erledigt">
       <div class="time">${s.t}</div>
-      <div><div class="name" data-p="${s.p}">${p.n}</div><div class="info">${s.info}</div>${s.go?`<div class="go">🚋 ${s.go}</div>`:""}</div></div>`}).join("");
-  showDayOnMap(d);
+      <div><div class="name" data-p="${s.p}">${p.n}</div><div class="info">${s.info}</div>${s.go?`<div class="go">🚋 ${s.go}</div>`:""}</div></div>`}).join("")
+    +(planResult||!d.start.length&&!d.end.length?"":"")+locked+extra;
+  showDayOnMap(stops);
 }
 document.getElementById("tabs").onclick=e=>{const b=e.target.closest(".tab");if(!b)return;curDay=+b.dataset.i;renderTabs();renderDay()};
 document.getElementById("daypanel").onclick=e=>{
@@ -371,34 +400,58 @@ renderTabs();renderDay();renderFilters();renderPlaces();loadWeather();
 const SUPABASE_URL="https://nwrrdbbnuseljmeqojey.supabase.co";
 const SUPABASE_KEY="sb_publishable_dvT7vJwoqNc62HFM64Y-9Q_5c-TUCpV";
 const TRIP="istanbul-2026";
-const ZONE={wizards:"asia",shine:"asia",moda:"asia",ciya:"asia",baylan:"asia",aliusta:"asia",modacoast:"asia",akmar:"asia",kuzguncuk:"far",zipline:"far",camlica:"far",
+const ZONE_UNUSED={wizards:"asia",shine:"asia",moda:"asia",ciya:"asia",baylan:"asia",aliusta:"asia",modacoast:"asia",akmar:"asia",kuzguncuk:"far",zipline:"far",camlica:"far",
   bazaar:"fr",bluemosque:"fr",cistern:"fr",hagia:"fr",topkapi:"fr",dirihan:"fr",spice:"fr",panorama:"fr",cemberlitas:"fr",
   salt:"sa",galata:"sa",misir:"sa",taksim:"sa",ortakoy:"sa",rooftop:"sa",kilicali:"sa",ist_modern:"sa",balikci:"sa",ferrytour:"sa",balat:"far"};
-const ZONES={fr:"Freitag · Altstadt",sa:"Samstag · Galata, Taksim, Bosporus",asia:"Do-Abend / So-Morgen · Kadıköy & Moda",far:"Nur mit Extra-Zeit (z. B. statt etwas am Fr/Sa)"};
+const DAYLABEL={do:"📅 Do-Abend · Kadıköy",fr:"📅 Freitag · Altstadt",sa:"📅 Samstag · Galata & Bosporus",so:"📅 So-Morgen · Kadıköy & Moda",x:"✨ Ausflug, braucht Extra-Zeit"};
 const EMO={sight:"🕌",shop:"🛍️",food:"☕",extra:"✨",tipp:"💡"};
-const SW_IDS=Object.keys(PLACES).filter(id=>PLACES[id].cat!=="hotel");
+const SW_IDS=Object.keys(SLOT);
 const swEl=document.getElementById("swipe");
 const esc=t=>String(t).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
 const db=(SUPABASE_URL&&SUPABASE_KEY&&window.supabase)?window.supabase.createClient(SUPABASE_URL,SUPABASE_KEY):null;
 
 let me=store.get("ist-me","");
-let myVotes=store.get("ist-myvotes",{});      // eigene Swipes (auch offline)
-let everyone={};                               // name -> votes, aus der Datenbank
+if(me&&!TRAVELERS.includes(me))me="";
+let myVotes=store.get("ist-myvotes",{});
+let everyone={};
 const doneV=v=>v&&SW_IDS.every(id=>v[id]!==undefined);
 
 async function pull(){
-  if(!db){everyone=me?{[me]:myVotes}:{};return}
-  const {data,error}=await db.from("swipes").select("name,votes").eq("trip",TRIP);
-  if(error){console.warn(error);return}
-  everyone={};data.forEach(r=>everyone[r.name]=r.votes||{});
+  if(db){
+    const {data,error}=await db.from("swipes").select("name,votes").eq("trip",TRIP);
+    if(!error){everyone={};data.forEach(r=>everyone[r.name]=r.votes||{})}else console.warn(error);
+  }
   if(me) everyone[me]={...(everyone[me]||{}),...myVotes};
+  computePlan();
 }
 let pushTimer=null;
 function push(){
   store.set("ist-myvotes",myVotes);
+  if(me) everyone[me]={...myVotes};
   if(!db||!me)return;
   clearTimeout(pushTimer);
   pushTimer=setTimeout(()=>db.from("swipes").upsert({trip:TRIP,name:me,votes:myVotes,updated_at:new Date().toISOString()}).then(({error})=>error&&console.warn(error)),300);
+}
+function scoreRows(){
+  const P=TRAVELERS.filter(n=>doneV(everyone[n]));
+  return {P,rows:SW_IDS.map(id=>{const vs=P.map(n=>everyone[n][id]??0);return{id,vs,yes:vs.filter(v=>v>0).length,score:vs.reduce((a,b)=>a+b,0),star:vs.includes(2)}}).sort((a,b)=>b.score-a.score)};
+}
+function computePlan(){
+  const allDone=TRAVELERS.every(n=>doneV(everyone[n]));
+  if(!allDone){if(planResult){planResult=null;renderDay()}return}
+  const {rows}=scoreRows(),N=TRAVELERS.length;
+  // gewählt: mind. 2 von 3 wollen, oder jemand hat ⭐
+  const chosen=rows.filter(r=>r.yes>=Math.ceil(N*2/3)||r.star);
+  const days={},extra=[];
+  DAYS.forEach(d=>{
+    const l=chosen.filter(r=>SLOT[r.id][0]===d.key).sort((a,b)=>b.score-a.score);
+    l.slice(d.max).forEach(r=>extra.push(r));
+    days[d.key]=l.slice(0,d.max).sort((a,b)=>SLOT[a.id][1]-SLOT[b.id][1]);
+  });
+  chosen.filter(r=>SLOT[r.id][0]==="x").forEach(r=>extra.push(r));
+  const before=JSON.stringify(planResult);
+  planResult={days,extra,chosen};
+  if(JSON.stringify(planResult)!==before)renderDay();
 }
 
 async function renderSwipe(){
@@ -406,18 +459,22 @@ async function renderSwipe(){
   if(!doneV(myVotes)) return renderStack();
   await pull(); renderResults();
 }
-function renderStart(){
+function statusLine(){
+  return TRAVELERS.map(n=>{const c=Object.keys(everyone[n]||{}).filter(id=>SW_IDS.includes(id)).length;
+    return `<span style="white-space:nowrap">${doneV(everyone[n])?"✅":"⏳"} ${esc(n)}${doneV(everyone[n])?"":` ${c}/${SW_IDS.length}`}</span>`}).join(" &nbsp; ");
+}
+async function renderStart(){
+  await pull();
   swEl.innerHTML=`<div class="sw-center">
-    <p>Swipe alle ${SW_IDS.length} Orte: ❤️ will ich, ✕ eher nicht, ⭐ unbedingt.<br>Sobald alle fertig sind, seht ihr hier eure Matches und einen Tagesvorschlag.</p>
-    <div class="sw-names"><input id="sw-me" placeholder="Dein Name" autocomplete="given-name"></div>
-    <button class="btn" id="sw-go">Los geht's 🔥</button>
-    ${db?"":'<p class="muted" style="margin-top:10px">⚠️ Gemeinsamer Speicher noch nicht verbunden. Swipes bleiben vorerst auf diesem Handy.</p>'}</div>`;
-  const inp=document.getElementById("sw-me");
-  const go=async()=>{const n=inp.value.trim();if(!n)return inp.focus();
-    me=n;store.set("ist-me",me);
-    if(db){const {data}=await db.from("swipes").select("votes").eq("trip",TRIP).eq("name",me).maybeSingle();if(data?.votes)myVotes={...data.votes,...myVotes}}
-    push();renderSwipe()};
-  document.getElementById("sw-go").onclick=go;inp.onkeydown=e=>e.key==="Enter"&&go();
+    <p>Swipe alle ${SW_IDS.length} Orte: ❤️ will ich, ✕ eher nicht, ⭐ unbedingt.<br>Sobald alle drei fertig sind, erscheint oben euer Programm.</p>
+    <p style="font-weight:600;margin:14px 0 8px">Wer swipt?</p>
+    <div style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap">${TRAVELERS.map(n=>`<button class="btn" data-me="${esc(n)}" style="min-width:90px">${esc(n)}</button>`).join("")}</div>
+    <p class="daynote" style="margin-top:14px">${statusLine()}</p>
+    ${db?"":'<p class="muted">⚠️ Gemeinsamer Speicher nicht erreichbar.</p>'}</div>`;
+  swEl.querySelectorAll("[data-me]").forEach(b=>b.onclick=()=>{
+    me=b.dataset.me;store.set("ist-me",me);if(window.renderPack)renderPack();
+    myVotes={...(everyone[me]||{})};store.set("ist-myvotes",myVotes);renderSwipe();
+  });
 }
 function renderStack(){
   const todo=SW_IDS.filter(id=>myVotes[id]===undefined);
@@ -425,7 +482,7 @@ function renderStack(){
   const pct=Math.round((SW_IDS.length-todo.length)/SW_IDS.length*100);
   const card=(id,back)=>{const p=PLACES[id];return `<div class="sw-card${back?" back":""}" data-id="${id}" style="background:linear-gradient(160deg,${CATS[p.cat].c},#0f2a43)">
     <div class="sw-emoji">${EMO[p.cat]||"📍"}</div><div class="stamp"></div>
-    <h3>${p.n}</h3><p>${p.d}</p><span class="sw-day">📅 ${ZONES[ZONE[id]]}</span></div>`};
+    <h3>${p.n}</h3><p>${p.d}</p><span class="sw-day">${DAYLABEL[SLOT[id][0]]}</span></div>`};
   swEl.innerHTML=`<div class="sw-who">${esc(me)} swipt · ${SW_IDS.length-todo.length+1}/${SW_IDS.length}</div>
     <div class="sw-progress"><div style="width:${pct}%"></div></div>
     <div class="stack">${todo[1]?card(todo[1],true):""}${card(todo[0])}</div>
@@ -448,44 +505,54 @@ function renderStack(){
     if(dy<-110&&Math.abs(dx)<80)vote(2);else if(dx>100)vote(1);else if(dx<-100)vote(0);else{top.style.transform="";stamp.style.opacity=0}};
   top.addEventListener("pointerup",end);top.addEventListener("pointercancel",end);
 }
-function switchUser(){me="";myVotes={};store.set("ist-me","");store.set("ist-myvotes",{});renderSwipe()}
+function switchUser(){me="";myVotes={};store.set("ist-me","");store.set("ist-myvotes",{});renderSwipe();if(window.renderPack)renderPack()}
 
 function renderResults(){
-  const names=Object.keys(everyone);
-  const fin=names.filter(n=>doneV(everyone[n])), open=names.filter(n=>!doneV(everyone[n]));
-  const P=fin,N=P.length;
-  const rows=SW_IDS.map(id=>{const vs=P.map(n=>everyone[n][id]??0);return{id,vs,yes:vs.filter(v=>v>0).length,score:vs.reduce((a,b)=>a+b,0),star:vs.includes(2)}})
-    .sort((a,b)=>b.score-a.score);
-  const all=rows.filter(r=>r.yes===N),maybe=rows.filter(r=>r.yes>0&&r.yes<N),no=rows.filter(r=>r.yes===0);
+  const allDone=TRAVELERS.every(n=>doneV(everyone[n]));
+  const {P,rows}=scoreRows(),N=P.length;
   const icon=v=>v===2?"⭐":v===1?"❤️":"✕";
-  const item=r=>`<div class="res-item"><span class="pn" data-p="${r.id}" style="cursor:pointer">${PLACES[r.id].n}</span><span class="votes">${N>1?r.vs.map((v,i)=>`${esc(P[i].slice(0,6))}${icon(v)}`).join(" "):""}</span></div>`;
-  const chosen=[...all,...maybe.filter(r=>r.star)];
-  const byDay={};chosen.forEach(r=>{const z=ZONE[r.id];(byDay[z]=byDay[z]||[]).push(r)});
-  const plan=Object.keys(ZONES).filter(z=>byDay[z]).map(z=>{const l=byDay[z].sort((a,b)=>b.score-a.score),top=l.slice(0,8),rest=l.slice(8);
-    return `<div class="res-day"><b>${ZONES[z]}</b>${top.map(r=>PLACES[r.id].n+(r.star?" ⭐":"")).join(" · ")}${rest.length?`<div class="muted">Zu voll, nur falls Zeit: ${rest.map(r=>PLACES[r.id].n).join(", ")}</div>`:""}</div>`}).join("");
-  const who=`<p class="daynote">✅ Fertig: ${fin.map(esc).join(", ")||"–"}${open.length?` · ⏳ Swipen noch: ${open.map(n=>`${esc(n)} (${Object.keys(everyone[n]).length}/${SW_IDS.length})`).join(", ")}`:""}</p>`;
-  swEl.innerHTML=`<p class="daytitle">🎉 ${N>1?"Eure Matches":"Du bist fertig!"}</p>${who}
-    ${N<2&&db?'<p class="daynote">Schick den Link zur Seite an die anderen. Ihre Swipes erscheinen hier automatisch.</p>':""}
-    <h3 style="font-size:1rem;margin:10px 0 0">🗓️ So würde ich es verteilen</h3>${plan||'<p class="muted">Noch keine gemeinsamen Treffer.</p>'}
-    <div class="res-group"><h3>✅ ${N>1?"Alle wollen":"Will ich"} (${all.length})</h3>${all.map(item).join("")||'<p class="muted">–</p>'}</div>
-    ${N>1?`<div class="res-group"><h3>🤔 Vielleicht (${maybe.length})</h3>${maybe.map(item).join("")||'<p class="muted">–</p>'}</div>`:""}
-    <div class="res-group"><h3>❌ ${N>1?"Lasst ihr weg":"Eher nicht"} (${no.length})</h3><p class="muted">${no.map(r=>PLACES[r.id].n).join(", ")||"–"}</p></div>
+  const item=r=>`<div class="res-item"><span class="pn" data-p="${r.id}" style="cursor:pointer">${PLACES[r.id].n}</span><span class="votes">${r.vs.map((v,i)=>`${esc(P[i])} ${icon(v)}`).join(" · ")}</span></div>`;
+  const all=rows.filter(r=>r.yes===N),maybe=rows.filter(r=>r.yes>0&&r.yes<N),no=rows.filter(r=>r.yes===0);
+  swEl.innerHTML=`<p class="daynote" style="text-align:center">${statusLine()}</p>`+(allDone?`
+    <p class="daytitle">🎉 Alle haben geswipt! Euer Programm steht oben im Plan.</p>
+    <div class="res-group"><h3>✅ Alle wollen (${all.length})</h3>${all.map(item).join("")||'<p class="muted">–</p>'}</div>
+    <div class="res-group"><h3>🤔 Nicht alle (${maybe.length})</h3>${maybe.map(item).join("")||'<p class="muted">–</p>'}</div>
+    <div class="res-group"><h3>❌ Will niemand (${no.length})</h3><p class="muted">${no.map(r=>PLACES[r.id].n).join(", ")||"–"}</p></div>`
+    :`<div class="sw-center"><p style="font-size:1.1rem">✅ Danke ${esc(me)}, du bist fertig!</p><p>Sobald alle drei durch sind, erscheint oben euer Programm. Diese Seite aktualisiert sich von selbst.</p></div>`)+`
     <div class="sw-center" style="display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin-top:14px">
-      <button class="btn" id="sw-fav">❤️ Als Lieblingsorte übernehmen</button>
-      <button class="btn ghost" id="sw-refresh">🔄 Aktualisieren</button>
+      ${allDone?'<button class="btn" id="sw-plan">📅 Zum Plan</button>':""}
       <button class="btn ghost" id="sw-redo">Meine Swipes neu machen</button>
-      <button class="btn ghost" id="sw-who2">Andere Person auf diesem Handy</button></div>`;
+      <button class="btn ghost" id="sw-who2">Andere Person</button></div>`;
   swEl.querySelectorAll(".pn").forEach(e=>e.onclick=()=>focusPlace(e.dataset.p));
-  document.getElementById("sw-fav").onclick=()=>{favs=chosen.map(r=>r.id);store.set("ist-favs",favs);filter="fav";renderFilters();renderPlaces();
-    document.getElementById("places").scrollIntoView({behavior:"smooth",block:"center"})};
-  document.getElementById("sw-refresh").onclick=renderSwipe;
-  document.getElementById("sw-redo").onclick=()=>{if(confirm("Deine Swipes zurücksetzen und neu swipen?")){myVotes={};push();renderSwipe()}};
+  const pl=document.getElementById("sw-plan");if(pl)pl.onclick=()=>{curDay=1;renderTabs();renderDay();document.getElementById("tabs").scrollIntoView({behavior:"smooth",block:"start"})};
+  document.getElementById("sw-redo").onclick=()=>{if(confirm("Deine Swipes zurücksetzen und neu swipen?")){myVotes={};push();computePlan();renderSwipe()}};
   document.getElementById("sw-who2").onclick=switchUser;
 }
-// Ergebnisse automatisch aktualisieren, solange die Seite offen ist
-setInterval(()=>{if(me&&doneV(myVotes)&&document.visibilityState==="visible")renderSwipe()},15000);
-document.addEventListener("visibilitychange",()=>{if(document.visibilityState==="visible"&&me&&doneV(myVotes))renderSwipe()});
-renderSwipe();
+// regelmässig aktualisieren, damit Plan & Status für alle stimmen
+async function refreshAll(){if(document.visibilityState!=="visible")return;await pull();if(!me||doneV(myVotes))renderSwipe()}
+setInterval(refreshAll,15000);
+document.addEventListener("visibilitychange",refreshAll);
+pull().then(renderSwipe);
+
+// ---------- Packliste ----------
+const PACK=[
+  ["📄 Dokumente",["Pass oder ID","Flugtickets / Boarding Pässe","Hotelbuchung (Otel Kadıköy)","Krankenkassenkarte / Reiseversicherung"]],
+  ["💳 Geld & Handy",["Kreditkarte + etwas Bargeld (TRY)","Istanbulkart-App aufgeladen","Powerbank","Ladekabel","Reiseadapter (Schweizer Stecker passen nicht in türkische Steckdosen)"]],
+  ["🧥 Kleidung",["Regenjacke","Warmer Pulli / Fleece","Bequeme, wasserfeste Schuhe","Schal oder Tuch (Kopfbedeckung für Moscheen)","Lange Hose / Rock über die Knie (Moscheen)","Etwas Schickes für die Rooftop-Bar","Pyjama"]],
+  ["🧖 Hamam",["Bikini / Badeanzug","Flip-Flops","Haargummi"]],
+  ["🎒 Unterwegs",["Kleiner Regenschirm","Tagesrucksack","Stoffbeutel für den Basar","Taschentücher","Sonnenbrille"]],
+  ["💊 Pflege",["Zahnbürste & Zahnpasta","Medikamente","Pflaster / Blasenpflaster","Ohrstöpsel","Handcreme / Lippenbalsam"]]
+];
+function renderPack(){
+  const k="ist-pack-"+(me||"x"),st=store.get(k,{}),tot=PACK.reduce((a,g)=>a+g[1].length,0),n=Object.values(st).filter(Boolean).length;
+  document.getElementById("pack").innerHTML=`<p class="daynote">${me?`Packliste von <b>${esc(me)}</b> · `:""}${n}/${tot} eingepackt</p>
+    <div class="sw-progress" style="max-width:none;margin-bottom:10px"><div style="width:${Math.round(n/tot*100)}%"></div></div>
+    <div class="routes">${PACK.map(([g,items])=>`<div class="route"><b>${g}</b>${items.map(it=>`<label style="display:flex;gap:8px;align-items:flex-start;padding:3px 0;cursor:pointer">
+      <input type="checkbox" data-pk="${esc(it)}" ${st[it]?"checked":""} style="accent-color:var(--tile);margin-top:3px"> <span ${st[it]?'style="text-decoration:line-through;opacity:.55"':""}>${it}</span></label>`).join("")}</div>`).join("")}</div>`;
+  document.querySelectorAll("[data-pk]").forEach(c=>c.onchange=()=>{st[c.dataset.pk]=c.checked;store.set(k,st);renderPack()});
+}
+renderPack();
+const _sw=switchUser;
 </script>
 </body>
 </html>
