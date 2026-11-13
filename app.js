@@ -41,7 +41,8 @@ const actDay = s => { const d = AREAS[s.area]?.day || "x"; return d === "kad" ? 
 
 const BASE = {
   hotel: { n: "Otel Kadıköy", ll: [40.9905, 29.0275], d: "Uzun Hafız Sk. 18 · 5 Min. zur Fähre" },
-  saw: { n: "Flughafen Sabiha Gökçen (SAW)", ll: [40.8986, 29.3092], d: "M4 direkt bis Kadıköy, knapp 1 Std." }
+  saw: { n: "Flughafen Sabiha Gökçen (SAW)", ll: [40.8986, 29.3092], d: "M4 direkt bis Kadıköy, knapp 1 Std." },
+  merter: { n: "Merter", ll: [41.0075, 28.8950], d: "Shopping · M4 → Marmaray bis Yenikapı → M1A bis Merter", other: true }
 };
 const DAYS = [
   { key: "do", tab: "Do 19.", date: "2026-11-19", title: "Ankunft & Kadıköy", note: "✈️ ZRH → SAW 10:50–15:45 (PC948) · BJV → SAW 16:25–17:45 (PC2249). Check-in ab 14 Uhr.",
@@ -80,8 +81,8 @@ const ACTIDS = () => Object.keys(SPOTS).filter(id => SPOTS[id].kind === "act");
 const SW_IDS = () => [...FOODIDS(), ...ACTIDS()];
 
 // ---------- Karte ----------
-const COLORS = { hotel: "#0f2a43", food: "#c8553d", act: "#1d5c7a", far: "#2a9d8f" };
-const colorOf = id => BASE[id] ? COLORS.hotel : SPOTS[id]?.area === "far" ? COLORS.far : COLORS[SPOTS[id]?.kind] || COLORS.act;
+const COLORS = { hotel: "#0f2a43", food: "#c8553d", act: "#1d5c7a", far: "#2a9d8f", other: "#e0a13a" };
+const colorOf = id => BASE[id]?.other ? COLORS.other : BASE[id] ? COLORS.hotel : SPOTS[id]?.area === "far" ? COLORS.far : COLORS[SPOTS[id]?.kind] || COLORS.act;
 const map = L.map("map", { scrollWheelZoom: false }).setView([41.012, 28.99], 12);
 L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", { maxZoom: 19, attribution: "© OpenStreetMap" }).addTo(map);
 let markers = {}, routeLine = null;
@@ -92,7 +93,7 @@ function renderMarkers() {
     markers[id] = L.circleMarker(p.ll, { radius: id === "hotel" ? 10 : 7, color: "#fff", weight: 2, fillColor: colorOf(id), fillOpacity: 1 }).addTo(map)
       .bindPopup(`<b>${esc(p.n)}</b><br><span style="color:#6b7380">${esc(p.d)}</span><br><a target="_blank" href="${route(p.ll)}">🚇 Route ↗</a> · <a target="_blank" href="${gmaps(p.n)}">📸 Fotos ↗</a>`);
   });
-  $("legend").innerHTML = [["Hotel & Flughafen", COLORS.hotel], ["Essen & Drinks", COLORS.food], ["Aktivitäten", COLORS.act], ["Ausflüge", COLORS.far]].map(([l, c]) => `<span style="--c:${c}">${l}</span>`).join("");
+  $("legend").innerHTML = [["Hotel & Flughafen", COLORS.hotel], ["Essen & Drinks", COLORS.food], ["Aktivitäten", COLORS.act], ["Ausflüge", COLORS.far], ["Merter", COLORS.other]].map(([l, c]) => `<span style="--c:${c}">${l}</span>`).join("");
 }
 function showDayOnMap(stops) {
   if (routeLine) map.removeLayer(routeLine);
