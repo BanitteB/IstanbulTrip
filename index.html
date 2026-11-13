@@ -90,7 +90,8 @@ main{max-width:1100px;margin:-50px auto 40px;padding:0 14px;display:grid;gap:16p
 .sw-emoji{font-size:4.5rem;position:absolute;top:22px;left:22px;filter:drop-shadow(0 4px 8px rgba(0,0,0,.2))}
 .sw-card{height:100%}
 .sw-credit{position:absolute;top:10px;left:12px;font-size:.65rem;color:#fff;opacity:.8;text-decoration:none;background:rgba(0,0,0,.35);padding:2px 7px;border-radius:999px;max-width:70%;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.sw-nophoto{position:absolute;top:30px;right:22px;font-size:.72rem;opacity:.7}
+.sw-gmaps{display:inline-block;margin:8px 0 0 6px;font-size:.78rem;font-weight:600;color:#fff;background:rgba(255,255,255,.22);border-radius:999px;padding:3px 10px;text-decoration:none}
+.sw-gmaps.big{position:absolute;top:110px;left:22px;margin:0;background:#fff;color:var(--navy);padding:8px 14px;font-size:.85rem;box-shadow:0 4px 12px rgba(0,0,0,.2)}
 .sw-card p{text-shadow:0 1px 3px rgba(0,0,0,.4)}
 .sw-card h3{text-shadow:0 2px 6px rgba(0,0,0,.4);font-family:Fraunces,serif;font-size:1.7rem;margin:0 0 6px;line-height:1.1}
 .sw-card p{margin:0;opacity:.92;font-size:.95rem}
@@ -451,6 +452,7 @@ const SUPABASE_KEY="sb_publishable_dvT7vJwoqNc62HFM64Y-9Q_5c-TUCpV";
 const TRIP="istanbul-2026";
 const EMO={sight:"🕌",shop:"🛍️",food:"🍽️",extra:"✨",tipp:"💡"};
 const DAYLABEL={do:"📅 Do-Abend",fr:"📅 Freitag · Altstadt",sa:"📅 Samstag · Galata & Bosporus",so:"📅 So-Morgen · Moda",x:"✨ Ausflug, braucht Extra-Zeit"};
+const gmaps=n=>"https://www.google.com/maps/search/?api=1&query="+encodeURIComponent(n.replace(/\s*\(.*?\)/g,"")+" Istanbul");
 const SWCATS={food:{label:"🍽️ Essen & Drinks",ids:Object.keys(FOOD)},act:{label:"🎯 Aktivitäten",ids:Object.keys(ACT)}};
 const SW_IDS=[...SWCATS.food.ids,...SWCATS.act.ids];
 const swEl=document.getElementById("swipe");
@@ -561,8 +563,8 @@ function renderStack(){
   const card=(id,back)=>{const p=PLACES[id],im=IMG[id];
     const bg=im?`background:linear-gradient(180deg,rgba(15,42,67,0) 30%,rgba(15,42,67,.92) 78%),url('${im[0]}') center/cover,#0f2a43`:`background:linear-gradient(160deg,${FOOD[id]?"#c8553d":CATS[p.cat].c},#0f2a43)`;
     return `<div class="sw-card${back?" back":""}" data-id="${id}" style="${bg}">
-    ${im?"":`<div class="sw-emoji">${FOOD[id]?"🍽️":EMO[p.cat]||"📍"}</div><div class="sw-nophoto">Kein Foto verfügbar</div>`}<div class="stamp"></div>
-    <h3>${p.n}</h3><p>${p.d}</p><span class="sw-day">${tag(id)}</span>
+    ${im?"":`<div class="sw-emoji">${FOOD[id]?"🍽️":EMO[p.cat]||"📍"}</div><a class="sw-gmaps big" href="${gmaps(p.n)}" target="_blank" rel="noopener">📸 Fotos auf Google Maps ansehen</a>`}<div class="stamp"></div>
+    <h3>${p.n}</h3><p>${p.d}</p><span class="sw-day">${tag(id)}</span>${im?`<a class="sw-gmaps" href="${gmaps(p.n)}" target="_blank" rel="noopener">📸 Mehr Fotos</a>`:""}
     ${im?`<a class="sw-credit" href="${im[1]}" target="_blank" rel="noopener">📷 ${esc(im[2])} · ${esc(im[3])}</a>`:""}</div>`};
   swEl.innerHTML=`<div class="sw-who">${esc(me)} · ${SWCATS[curCat].label} · ${ids.length-todo.length+1}/${ids.length}</div>
     <div class="sw-progress"><div style="width:${pct}%"></div></div>
@@ -570,6 +572,7 @@ function renderStack(){
     <div class="sw-btns"><button class="sw-btn" data-v="0" aria-label="Nein">✕</button><button class="sw-btn star" data-v="2" aria-label="Unbedingt">⭐</button><button class="sw-btn" data-v="1" aria-label="Ja">❤️</button></div>
     <div class="sw-center"><button class="btn ghost small" id="sw-undo">↩︎ Zurück</button> <button class="btn ghost small" id="sw-back">Kategorie wechseln</button></div>`;
   const top=swEl.querySelector(".stack .sw-card:last-child"),stamp=top.querySelector(".stamp");
+  top.querySelectorAll("a").forEach(a=>a.addEventListener("pointerdown",e=>e.stopPropagation()));
   const vote=v=>{
     top.style.transform=v===2?"translateY(-600px)":`translateX(${v?600:-600}px) rotate(${v?25:-25}deg)`;
     myVotes[top.dataset.id]=v;push();setTimeout(renderSwipe,220);
