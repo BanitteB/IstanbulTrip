@@ -159,7 +159,7 @@ footer{text-align:center;color:var(--muted);font-size:.78rem;padding:10px 0 30px
     <div class="routes">
       <div class="route"><b>☔ Bei Regen</b>Hamam statt Spaziergang: Çemberlitaş passt in den Altstadt-Tag, Kılıç Ali Paşa in den Karaköy-Tag. Oder Istanbul Modern.</div>
       <div class="route"><b>⛴️ Bosporus günstig</b>Statt privater Sunset-Cruise: die öffentliche Kurz-Tour von Şehir Hatları ab Eminönü (ca. 14:40, gut 2 Std.). Abfahrt am Anleger checken.</div>
-      <div class="route"><b>🥐 Asiatische Seite</b>Zipline + Kuzguncuk zusammen machen: Frühstück in Kuzguncuk, dann zum Nakkaştepe-Park. Perfekt für Do oder So.</div>
+      <div class="route"><b>🥐 Asiatische Seite</b>Zipline + Kuzguncuk passen zusammen: Frühstück in Kuzguncuk, dann zum Nakkaştepe-Park. Braucht einen halben Tag.</div>
       <div class="route"><b>🍽️ Essen in Kadıköy</b>Durch den Markt schlendern, bei Çiya essen, Kup Griye bei Baylan. Preise vorher fragen, viele Lokale nehmen gern bar.</div>
       <div class="route"><b>🌅 Abend in Moda</b>Mit der Nostalgie-Tram nach Moda, Eis oder Sahlep bei Ali Usta, dann aufs Ufer zum Sonnenuntergang.</div>
       <div class="route"><b>🐟 Mittag in Karaköy</b>Tarihi Karaköy Balıkçısı: wenige Plätze, die Küche schliesst, wenn der Fisch weg ist.</div>
@@ -176,9 +176,8 @@ footer{text-align:center;color:var(--muted);font-size:.78rem;padding:10px 0 30px
       <div class="route"><b>Galata / Karaköy</b>Fähre direkt nach Karaköy</div>
       <div class="route"><b>Taksim / İstiklal</b>Fähre nach Karaköy, dann F2 Tünel hoch</div>
       <div class="route"><b>Beşiktaş / Ortaköy</b>Fähre nach Beşiktaş, Bus ca. 10 Min. nach Ortaköy</div>
-      <div class="route"><b>Merter</b>M4 → Ayrılık Çeşmesi → Marmaray bis Yenikapı → M1A</div>
       <div class="route"><b>Üsküdar / Zipline</b>M4 → Ayrılık Çeşmesi → Marmaray eine Station</div>
-      <div class="route"><b>Flughafen SAW</b>M4 direkt ab Kadıköy, knapp 1 Std.</div>
+      <div class="route"><b>Flughafen SAW</b>M4 direkt ab Kadıköy, knapp 1 Std. Das Hotel bietet auch einen Flughafentransfer.</div>
     </div>
     <p class="muted" style="margin:10px 0 0">Alles mit der Istanbulkart-App. Sonnenuntergang ca. 16:40.</p>
   </section>
@@ -203,7 +202,6 @@ const PLACES = {
   wizards:{n:"Wizards Coffee House",cat:"food",ll:[40.9893,29.0262],d:"Harry-Potter-Café, täglich 10–23 Uhr, Desserts top"},
   shine:{n:"Shine Terrace",cat:"food",ll:[40.9898,29.0255],d:"Abend-Drink in Kadıköy (Lage ungefähr)"},
   moda:{n:"Moda",cat:"food",ll:[40.9800,29.0262],d:"Frühstück im schönsten Viertel von Kadıköy"},
-  merter:{n:"Merter",cat:"shop",ll:[41.0080,28.8940],d:"Shopping am Vormittag"},
   bazaar:{n:"Grosser Basar",cat:"shop",ll:[41.0107,28.9681],d:"Lampen, Teppiche, überdacht"},
   bluemosque:{n:"Blaue Moschee",cat:"sight",ll:[41.0054,28.9768],d:"Freitag erst nachmittags (Freitagsgebet)"},
   cistern:{n:"Basilika-Zisterne",cat:"sight",ll:[41.0084,28.9779],d:"Unterirdisch, perfekt bei Regen"},
@@ -218,7 +216,7 @@ const PLACES = {
   ortakoy:{n:"Ortaköy-Moschee",cat:"sight",ll:[41.0473,29.0270],d:"Sonnenuntergang mit Brückenblick"},
   rooftop:{n:"Rooftop Karaköy",cat:"food",ll:[41.0225,28.9775],d:"Roof106 oder Opaque (Lage ungefähr)"},
   zipline:{n:"Zipline Bosporus",cat:"extra",ll:[41.0360,29.0330],d:"Nakkaştepe, ab ca. 19 €, online buchen"},
-  panorama:{n:"Panorama 1453",cat:"extra",ll:[41.0195,28.9230],d:"360°-Rundgemälde, nah bei Merter"},
+  panorama:{n:"Panorama 1453",cat:"extra",ll:[41.0195,28.9230],d:"360°-Rundgemälde, gut bei Regen (M1A Topkapı-Ulubatlı)"},
   camlica:{n:"Çamlıca-Moschee",cat:"extra",ll:[41.0270,29.0690],d:"Auf eurer Seite, Do oder So"},
   balat:{n:"Balat + Feshane",cat:"extra",ll:[41.0297,28.9490],d:"Bunte Häuser, braucht einen halben Tag"},
   ciya:{n:"Kadıköy-Markt & Çiya Sofrası",cat:"tipp",ll:[40.9897,29.0258],d:"Essensmarkt (täglich) + berühmtes anatolisches Lokal, 3 Min. vom Hotel"},
@@ -234,20 +232,20 @@ const PLACES = {
   ferrytour:{n:"Öffentliche Bosporus-Tour",cat:"tipp",ll:[41.0172,28.9735],d:"Şehir Hatları ab Eminönü, viel günstiger als private Cruises"}
 };
 const DAYS = [
-  {key:"do",tab:"Do 19.",date:"2026-11-19",title:"Ankunft & Kadıköy",note:"Locker ankommen, das Viertel erkunden.",stops:[
-    {t:"Ankunft",p:"hotel",info:"Einchecken"},
-    {t:"Abend",p:"wizards",info:"Gleich ums Eck vom Hotel"},
-    {t:"Abend",p:"ciya",info:"Abendessen um die Ecke"},
-    {t:"Optional",p:"camlica",info:"Falls ihr früh landet"}]},
-  {key:"fr",tab:"Fr 20.",date:"2026-11-20",title:"Merter + Altstadt",note:"Geht auch bei Regen, fast alles drinnen.",stops:[
-    {t:"Vormittag",p:"merter",info:"Shopping",go:"M4 → Marmaray → M1A"},
-    {t:"Mittag",p:"bazaar",info:"Überdacht, Lampen & Teppiche",go:"M1A Zeytinburnu → T1"},
-    {t:"Nachmittag",p:"bluemosque",info:"Erst nach dem Freitagsgebet"},
+  {key:"do",tab:"Do 19.",date:"2026-11-19",title:"Ankunft & Kadıköy",note:"✈️ ZRH → SAW 10:50–15:45 (PC948) · BJV → SAW 16:25–17:45 (PC2249). Check-in ab 14 Uhr.",stops:[
+    {t:"15:45",p:"iskele",info:"Zürich-Gruppe landet, M4 direkt bis Kadıköy (knapp 1 Std.)",go:"Oder Hotel-Flughafentransfer"},
+    {t:"ca. 17:00",p:"hotel",info:"Einchecken, Kadıköy erkunden"},
+    {t:"17:45",p:"iskele",info:"Bodrum-Flug landet, ca. 19 Uhr im Hotel"},
+    {t:"19:30",p:"ciya",info:"Gemeinsames Abendessen um die Ecke"},
+    {t:"Danach",p:"wizards",info:"Dessert im Harry-Potter-Café (bis 23 Uhr)"}]},
+  {key:"fr",tab:"Fr 20.",date:"2026-11-20",title:"Altstadt",note:"Geht auch bei Regen, fast alles drinnen.",stops:[
+    {t:"Morgen",p:"spice",info:"Fähre nach Eminönü, direkt am Gewürzbasar",go:"Fähre ab Kadıköy ca. 20 Min."},
+    {t:"Vormittag",p:"bazaar",info:"Überdacht, Lampen & Teppiche",go:"T1 bis Beyazıt-Kapalıçarşı"},
+    {t:"Mittag",p:"hagia",info:"Oder stattdessen Topkapı"},
     {t:"",p:"cistern",info:"Gleich gegenüber"},
-    {t:"",p:"hagia",info:"Oder stattdessen Topkapı"},
-    {t:"",p:"dirihan",info:"Auf dem Weg nach Eminönü"},
-    {t:"Spätnachm.",p:"spice",info:"Dann Fähre zurück nach Kadıköy"},
-    {t:"Abend",p:"shine",info:"Drink in Kadıköy"}]},
+    {t:"Nachmittag",p:"bluemosque",info:"Erst nach dem Freitagsgebet"},
+    {t:"",p:"dirihan",info:"Auf dem Weg zurück nach Eminönü"},
+    {t:"Abend",p:"shine",info:"Fähre heim, Drink in Kadıköy"}]},
   {key:"sa",tab:"Sa 21.",date:"2026-11-21",title:"Galata, Taksim, Bosporus",note:"Am schönsten bei trockenem Wetter.",stops:[
     {t:"Morgen",p:"moda",info:"Frühstück, dann Fähre nach Karaköy"},
     {t:"Vormittag",p:"salt",info:"Gleich nach der Fähre"},
@@ -256,11 +254,11 @@ const DAYS = [
     {t:"",p:"taksim",info:"Mit der roten Tram",go:"Zurück: F2 Tünel nach Karaköy"},
     {t:"16:40",p:"ortakoy",info:"Sonnenuntergang + Kumpir (oder Bosporus-Tour)",go:"Bus ab Beşiktaş ca. 10 Min."},
     {t:"Abend",p:"rooftop",info:"Drinks & Abendessen, dann Fähre heim"}]},
-  {key:"so",tab:"So 22.",date:"2026-11-22",title:"Abreise",note:"Flugzeit eintragen, dann passt der Rest.",stops:[
-    {t:"Vormittag",p:"wizards",info:"Falls am Donnerstag nicht geschafft"},
-    {t:"Morgen",p:"kuzguncuk",info:"Frühstück, falls Zeit bis zum Flug"},
-    {t:"Optional",p:"zipline",info:"Ab ca. 12 Uhr, bei Wind prüfen"},
-    {t:"Abflug",p:"iskele",info:"SAW: M4 direkt, knapp 1 Std."}]}
+  {key:"so",tab:"So 22.",date:"2026-11-22",title:"Abreise",note:"✈️ SAW → BJV 13:55 (PC2248) · SAW → Basel 15:00 (AJet VF105). Check-out bis 12 Uhr.",stops:[
+    {t:"Morgen",p:"moda",info:"Letztes Frühstück am Meer"},
+    {t:"",p:"baylan",info:"Kup Griye zum Abschied (oder Wizards)"},
+    {t:"11:30",p:"hotel",info:"Check-out, Bodrum-Flug: spätestens jetzt los"},
+    {t:"12:00",p:"iskele",info:"Basel-Flug: M4 direkt zum SAW, knapp 1 Std."}]}
 ];
 
 // ---------- Speicher (nur dieses Gerät) ----------
@@ -361,7 +359,7 @@ async function loadWeather(){
     }
     el.innerHTML=cards;
     const tip=document.getElementById("wtip");
-    if(rainy.includes("Sa 21.")&&!rainy.includes("Fr 20.")) tip.textContent="☔ Samstag sieht nasser aus als Freitag: Tauscht die Tage! Galata & Bosporus am Freitag, Merter + Altstadt (drinnen) am Samstag.";
+    if(rainy.includes("Sa 21.")&&!rainy.includes("Fr 20.")) tip.textContent="☔ Samstag sieht nasser aus als Freitag: Tauscht die Tage! Galata & Bosporus am Freitag, die Altstadt (drinnen) am Samstag.";
     else if(rainy.length) tip.textContent=`☔ Regen möglich am ${rainy.join(", ")}. Regenjacke & wasserfeste Schuhe einpacken.`;
     else if(idx.some(i=>i>=0)) tip.textContent="👍 Sieht gut aus, der Plan passt so.";
   }catch(e){el.innerHTML=`<div class="muted">Wetter gerade nicht erreichbar.</div>`}
@@ -373,10 +371,10 @@ renderTabs();renderDay();renderFilters();renderPlaces();loadWeather();
 const SUPABASE_URL="https://nwrrdbbnuseljmeqojey.supabase.co";
 const SUPABASE_KEY="sb_publishable_dvT7vJwoqNc62HFM64Y-9Q_5c-TUCpV";
 const TRIP="istanbul-2026";
-const ZONE={wizards:"asia",shine:"asia",moda:"asia",ciya:"asia",baylan:"asia",aliusta:"asia",modacoast:"asia",akmar:"asia",kuzguncuk:"asia",zipline:"asia",camlica:"asia",
-  merter:"fr",bazaar:"fr",bluemosque:"fr",cistern:"fr",hagia:"fr",topkapi:"fr",dirihan:"fr",spice:"fr",panorama:"fr",cemberlitas:"fr",
+const ZONE={wizards:"asia",shine:"asia",moda:"asia",ciya:"asia",baylan:"asia",aliusta:"asia",modacoast:"asia",akmar:"asia",kuzguncuk:"far",zipline:"far",camlica:"far",
+  bazaar:"fr",bluemosque:"fr",cistern:"fr",hagia:"fr",topkapi:"fr",dirihan:"fr",spice:"fr",panorama:"fr",cemberlitas:"fr",
   salt:"sa",galata:"sa",misir:"sa",taksim:"sa",ortakoy:"sa",rooftop:"sa",kilicali:"sa",ist_modern:"sa",balikci:"sa",ferrytour:"sa",balat:"far"};
-const ZONES={fr:"Freitag · Merter & Altstadt",sa:"Samstag · Galata, Taksim, Bosporus",asia:"Do-Abend / So · Kadıköy & asiatische Seite",far:"Nur mit Extra-Zeit"};
+const ZONES={fr:"Freitag · Altstadt",sa:"Samstag · Galata, Taksim, Bosporus",asia:"Do-Abend / So-Morgen · Kadıköy & Moda",far:"Nur mit Extra-Zeit (z. B. statt etwas am Fr/Sa)"};
 const EMO={sight:"🕌",shop:"🛍️",food:"☕",extra:"✨",tipp:"💡"};
 const SW_IDS=Object.keys(PLACES).filter(id=>PLACES[id].cat!=="hotel");
 const swEl=document.getElementById("swipe");
