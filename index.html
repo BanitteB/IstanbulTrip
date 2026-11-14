@@ -136,6 +136,20 @@ html,body{overflow-x:hidden;max-width:100%}
 .say{border:1px solid var(--line);background:#fff;border-radius:50%;width:34px;height:34px;flex:none;cursor:pointer;font-size:1rem}
 .netzwrap{overflow-x:auto;background:#fff;border:1px solid var(--line);border-radius:12px;padding:6px}
 .netz{min-width:640px;width:100%;height:auto;display:block;font-family:Inter,sans-serif}
+.rounds{display:grid;gap:10px;max-width:420px;margin:12px auto 0}
+.round{font:inherit;text-align:left;border:1px solid var(--line);background:#fff;border-radius:14px;padding:12px 14px;cursor:pointer;display:grid;gap:2px;box-shadow:0 2px 8px rgba(15,42,67,.06)}
+.round b{font-size:1rem}.round span{font-size:.85rem;color:var(--muted)}.round .rs{font-weight:600;color:var(--navy)}
+.round.ok{background:#eaf5f3;border-color:var(--tile)}.round[disabled]{opacity:.5;cursor:not-allowed}
+.sw-chips{display:flex;flex-wrap:wrap;gap:5px;margin-top:8px}.sw-chips span{background:rgba(255,255,255,.2);border-radius:999px;padding:2px 9px;font-size:.75rem;font-weight:600}
+.sw-q{display:inline-block;align-self:flex-start;background:#7b4fa0;border-radius:999px;padding:2px 10px;font-size:.75rem;font-weight:600;margin-bottom:6px}
+.sw-tip{font-size:.82rem;margin-top:6px!important;opacity:.95}
+.stack.tall{height:470px}
+.qcard h3{font-size:2rem}
+.intro{max-width:340px;margin:10px auto 0;border-radius:20px;color:#fff;padding:24px;min-height:360px;display:flex;flex-direction:column;justify-content:flex-end;box-shadow:0 10px 30px rgba(15,42,67,.25)}
+.intro h3{font-family:Fraunces,serif;font-size:2rem;margin:4px 0 6px;line-height:1.05}.intro p{margin:0;opacity:.95}
+.intro-k{font-size:.75rem;text-transform:uppercase;letter-spacing:.08em;opacity:.85}
+.qstop{background:#f3edf8;border-radius:10px;padding-left:6px;margin-top:6px}.qstop .name{color:#7b4fa0}
+.adm-q{background:#f3edf8;border-radius:8px;padding:6px;border-top:0;margin-top:10px}.adm-sub{padding-left:18px}
 footer{text-align:center;color:var(--muted);font-size:.78rem;padding:10px 0 30px}
 </style>
 </head>
@@ -290,26 +304,23 @@ footer{text-align:center;color:var(--muted);font-size:.78rem;padding:10px 0 30px
     <h3 style="font-size:1rem">Swipes</h3>
     <div id="adm-status" class="daynote"></div>
     <div style="display:flex;gap:8px;flex-wrap:wrap" id="adm-btns"></div>
-    <h3 style="font-size:1rem;margin-top:22px;display:flex;justify-content:space-between;align-items:center">Orte zum Swipen <button class="btn small" id="adm-new">+ Neuer Ort</button></h3>
+    <h3 style="font-size:1rem;margin-top:22px;display:flex;justify-content:space-between;align-items:center;gap:6px;flex-wrap:wrap">Viertel & Orte zum Swipen <span><button class="btn ghost small" id="adm-newq">+ Viertel</button> <button class="btn small" id="adm-new">+ Ort</button></span></h3>
     <div id="ed" class="ed" style="display:none">
-      <h4 id="ed-title" style="margin:0 0 8px">Neuer Ort</h4>
-      <label>Name<input id="ed-n" placeholder="z. B. Karaköy Güllüoğlu"></label>
-      <label>Kurzbeschreibung<input id="ed-d" placeholder="Was ist das Besondere?"></label>
+      <h4 id="ed-title" style="margin:0 0 8px">Neu</h4>
+      <label>Art<select id="ed-kind"><option value="quarter">🗺️ Viertel (Runde 1)</option><option value="act">🎯 Sehenswert / Aktivität (Runde 2)</option><option value="food">🍽️ Essen & Drinks (Runde 3)</option></select></label>
+      <label>Name<input id="ed-n" placeholder="z. B. Balat & Fener"></label>
+      <label>Was gibt es dort / was macht man?<input id="ed-d" placeholder="Kurz und knackig"></label>
+      <div id="ed-qwrap"><label>Liegt im Viertel<select id="ed-q"></select></label></div>
+      <div id="ed-daywrap"><label>Passt auf<select id="ed-day"><option value="fr">Freitag</option><option value="sa">Samstag</option><option value="flex">Fr oder Sa (wo Platz ist)</option><option value="kad">Do-Abend / So-Morgen (Hotelnähe)</option></select></label></div>
       <div class="ed-2">
-        <label>Art<select id="ed-kind"><option value="act">🎯 Aktivität</option><option value="food">🍽️ Essen & Drinks</option></select></label>
-        <label>Gegend<select id="ed-area">
-          <option value="kad">Kadıköy & Moda (Do-Abend / So-Morgen)</option>
-          <option value="alt">Altstadt: Sultanahmet, Eminönü (Freitag)</option>
-          <option value="bey">Karaköy, Galata & Taksim (Samstag)</option>
-          <option value="bos">Beşiktaş & Ortaköy (Samstag)</option>
-          <option value="far">Weiter weg / Ausflug (wenn Zeit bleibt)</option></select></label>
+        <label>Stimmung<select id="ed-vibe"><option>Touristisch</option><option>Lokal</option><option>Gemischt</option></select></label>
+        <label>Weg ab Hotel<input id="ed-dist" placeholder="z. B. ca. 30 Min. (Fähre)"></label>
       </div>
-      <div id="ed-partwrap"><label>Tageszeit<select id="ed-part"><option value="vm">Vormittag</option><option value="nm">Nachmittag</option><option value="ab">Abend</option></select></label></div>
       <div id="ed-meals" class="ed-meals">Passt zu:
         <label><input type="checkbox" data-meal="br"> Frühstück</label><label><input type="checkbox" data-meal="lu"> Mittag</label>
         <label><input type="checkbox" data-meal="sn"> Kaffee & Dessert</label><label><input type="checkbox" data-meal="di"> Abendessen</label><label><input type="checkbox" data-meal="dr"> Drinks</label></div>
-      <label>Tipp (erscheint bei „Tipps & Ideen“)<input id="ed-tip" placeholder="optional"></label>
-      <label>Anfahrt (optional, erscheint im Plan)<input id="ed-go" placeholder="z. B. M2 bis Şişhane, dann 5 Min. zu Fuss"></label>
+      <label id="ed-tiplabel">Tipp<input id="ed-tip" placeholder="optional"></label>
+      <div id="ed-gowrap"><label>Anreise<input id="ed-go" placeholder="z. B. Fähre direkt ab Kadıköy"></label></div>
       <div class="ed-box"><b>📍 Position auf der Karte</b>
         <div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:6px"><button class="btn ghost small" id="ed-geo">Nach Namen suchen</button></div>
         <div style="display:flex;gap:6px;margin-top:6px"><input id="ed-gm" placeholder="…oder Google-Maps-Link einfügen" style="flex:1"><button class="btn ghost small" id="ed-gm-go">Übernehmen</button></div>
@@ -318,7 +329,7 @@ footer{text-align:center;color:var(--muted);font-size:.78rem;padding:10px 0 30px
       <div class="ed-box"><b>📷 Foto</b>
         <div id="ed-img-prev" style="margin-top:6px"></div>
         <div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:6px"><button class="btn ghost small" id="ed-img">Freie Fotos suchen (Wikimedia)</button></div>
-        <input id="ed-imgurl" placeholder="…oder eigenen Foto-Link einfügen (z. B. aus Google Drive/Imgur)" style="margin-top:6px">
+        <input id="ed-imgurl" placeholder="…oder Link zu einem eigenen Foto" style="margin-top:6px">
         <div id="ed-img-res" style="margin-top:6px"></div></div>
       <div style="display:flex;gap:8px;align-items:center;margin-top:10px"><button class="btn" id="ed-save">Speichern</button><button class="btn ghost" id="ed-cancel">Abbrechen</button><span id="ed-msg" class="muted"></span></div>
     </div>
@@ -334,6 +345,6 @@ footer{text-align:center;color:var(--muted);font-size:.78rem;padding:10px 0 30px
 
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="app.js?v=15"></script>
+<script src="app.js?v=20"></script>
 </body>
 </html>
