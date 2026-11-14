@@ -182,6 +182,15 @@ html,body{overflow-x:hidden;max-width:100%}
 .idea{background:var(--sand);border-radius:10px;padding:8px 12px;font-size:.9rem}
 .idea-h{display:flex;gap:8px;align-items:baseline;margin-bottom:2px}.idea-h .muted{font-size:.75rem}
 .idea-del{margin-left:auto;border:0;background:none;cursor:pointer}
+.nf{display:grid;grid-template-columns:minmax(0,2fr) minmax(0,1fr);gap:12px}
+@media(max-width:700px){.nf{grid-template-columns:1fr}}
+.nf-taxi{background:#fff8e6;border:2px solid var(--gold);border-radius:14px;padding:14px}
+.nf-tr{font-weight:700;margin:6px 0 4px}.nf-addr{font-family:Fraunces,serif;font-size:1.35rem;line-height:1.25;margin:0 0 6px}
+.nf-btns{display:flex;gap:6px;flex-wrap:wrap;margin-top:10px}
+.nf-sos{background:#fdecea;border-radius:14px;padding:14px;font-size:.9rem}
+.nf-112{display:inline-block;background:#c62828;color:#fff;font-weight:800;font-size:1.6rem;padding:8px 18px;border-radius:12px;text-decoration:none}
+.taxi-full{position:fixed;inset:0;z-index:6000;background:#fff8e6;display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;padding:24px}
+.taxi-full .nf-tr{font-size:1.6rem}.taxi-full .nf-addr{font-size:2.4rem}
 footer{text-align:center;color:var(--muted);font-size:.78rem;padding:10px 0 30px}
 </style>
 </head>
@@ -266,6 +275,28 @@ footer{text-align:center;color:var(--muted);font-size:.78rem;padding:10px 0 30px
   <section class="card span2">
     <h2>🧳 Packliste</h2>
     <div id="pack"></div>
+  </section>
+
+  <section class="card span2" id="notfall">
+    <h2>🆘 Notfall & Infos</h2>
+    <div class="nf">
+      <div class="nf-taxi" id="taxi-card">
+        <span class="muted">🚕 Fürs Taxi zeigen</span>
+        <p class="nf-tr">Beni bu adrese götürür müsünüz?</p>
+        <p class="nf-addr">Otel Kadıköy<br>Uzun Hafız Sokak No: 18<br>Osmanağa, Kadıköy / İstanbul</p>
+        <p class="muted" style="margin:0">„Können Sie mich zu dieser Adresse bringen?“</p>
+        <div class="nf-btns">
+          <button class="btn small" id="taxi-full">⛶ Gross anzeigen</button>
+          <button class="btn ghost small" id="taxi-copy">📋 Adresse kopieren</button>
+          <a class="btn ghost small" href="https://www.google.com/maps/search/?api=1&query=Otel+Kad%C4%B1k%C3%B6y+Uzun+Haf%C4%B1z+Sokak+18+Kad%C4%B1k%C3%B6y" target="_blank" rel="noopener">🗺️ Google Maps</a>
+        </div>
+      </div>
+      <div class="nf-sos">
+        <a class="nf-112" href="tel:112">📞 112</a>
+        <p style="margin:6px 0 0"><b>Notruf</b> für Polizei, Ambulanz und Feuerwehr, kostenlos von jedem Handy.</p>
+        <p class="muted" style="margin:6px 0 0">Hilfe! = <b>İmdat!</b> · Ich brauche einen Arzt = <b>Doktora ihtiyacım var</b></p>
+      </div>
+    </div>
   </section>
 
   <section class="card span2">
@@ -390,6 +421,6 @@ footer{text-align:center;color:var(--muted);font-size:.78rem;padding:10px 0 30px
 
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="app.js?v=30"></script>
+<script src="app.js?v=31"></script>
 </body>
 </html>

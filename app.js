@@ -518,6 +518,14 @@ function renderAdmIdeas() {
   if ($("adm-ideas-all")) $("adm-ideas-all").onclick = async () => { if (!confirm(`Alle ${IDEAS.length} Kommentare löschen?`)) return; try { for (const i of IDEAS) await rpc("admin_delete_idea", { iid: i.id }); await loadIdeas(); renderAdmIdeas() } catch (e) { alert(e.message) } };
 }
 
+// ---------- Notfall / Taxi-Karte ----------
+$("taxi-full").onclick = () => {
+  const d = document.createElement("div"); d.className = "taxi-full";
+  d.innerHTML = `<p class="nf-tr">Beni bu adrese götürür müsünüz?</p><p class="nf-addr">Otel Kadıköy<br>Uzun Hafız Sokak No: 18<br>Osmanağa, Kadıköy / İstanbul</p><p class="muted">Antippen zum Schliessen</p>`;
+  d.onclick = () => d.remove(); document.body.appendChild(d);
+};
+$("taxi-copy").onclick = async () => { try { await navigator.clipboard.writeText("Otel Kadıköy, Uzun Hafız Sokak No: 18, Osmanağa, Kadıköy / İstanbul"); $("taxi-copy").textContent = "✅ Kopiert" } catch (e) { $("taxi-copy").textContent = "Kopieren ging nicht" } setTimeout(() => $("taxi-copy").textContent = "📋 Adresse kopieren", 2500) };
+
 // ---------- Admin ----------
 let admPw = (() => { try { return sessionStorage.getItem("ist-adm") || "" } catch (e) { return "" } })();
 let editId = null, edImg = null;
