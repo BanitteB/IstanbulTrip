@@ -345,12 +345,13 @@ function renderStack() {
   swEl.querySelectorAll(".sw-btn").forEach(b => b.onclick = () => vote(+b.dataset.v));
   $("sw-undo").onclick = () => { const d = ids.filter(id => myVotes[id] !== undefined); if (d.length) { delete myVotes[d[d.length - 1]]; push(); renderStack() } };
   $("sw-who").onclick = switchUser;
-  let x0 = null, y0 = 0;
-  top.addEventListener("pointerdown", e => { x0 = e.clientX; y0 = e.clientY; top.classList.add("drag"); top.setPointerCapture(e.pointerId) });
-  top.addEventListener("pointermove", e => { if (x0 === null) return; const dx = e.clientX - x0, dy = Math.min(0, e.clientY - y0);
-    top.style.transform = `translate(${dx}px,${dy}px) rotate(${dx / 15}deg)`;
-    const up = dy < -80 && Math.abs(dx) < 80; stamp.textContent = up ? "UNBEDINGT" : dx > 0 ? "JA" : "NEIN"; stamp.style.opacity = up ? Math.min(1, -dy / 120) : Math.min(1, Math.abs(dx) / 100) });
-  const end = e => { if (x0 === null) return; const dx = e.clientX - x0, dy = e.clientY - y0; x0 = null; top.classList.remove("drag");
+  let x0 = null, y0 = 0, lx = 0, ly = 0;
+  top.addEventListener("pointerdown", e => { x0 = e.clientX; y0 = e.clientY; lx = 0; ly = 0; top.classList.add("drag"); try { top.setPointerCapture(e.pointerId) } catch (er) {} });
+  top.addEventListener("pointermove", e => { if (x0 === null) return; lx = e.clientX - x0; ly = e.clientY - y0; const dy = Math.min(0, ly);
+    top.style.transform = `translate(${lx}px,${dy}px) rotate(${lx / 15}deg)`;
+    const up = dy < -80 && Math.abs(lx) < 80; stamp.textContent = up ? "UNBEDINGT" : lx > 0 ? "JA" : "NEIN"; stamp.style.opacity = up ? Math.min(1, -dy / 120) : Math.min(1, Math.abs(lx) / 100) });
+  // Entscheidung nur anhand der letzten echten Bewegung (manche Handys melden beim Abbrechen x=0)
+  const end = () => { if (x0 === null) return; const dx = lx, dy = ly; x0 = null; top.classList.remove("drag");
     if (dy < -110 && Math.abs(dx) < 80) vote(2); else if (dx > 100) vote(1); else if (dx < -100) vote(0); else { top.style.transform = ""; stamp.style.opacity = 0 } };
   top.addEventListener("pointerup", end); top.addEventListener("pointercancel", end);
 }
