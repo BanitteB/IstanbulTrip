@@ -96,8 +96,10 @@ function showDayOnMap(stops) {
   routeLine = L.polyline(pts, { color: "#c8553d", weight: 3, dashArray: "6 6" }).addTo(map);
   map.fitBounds(L.latLngBounds(pts).pad(.25));
 }
+function openSec(el) { const sec = el?.closest("main > section.card"); if (sec && sec.classList.contains("collapsed")) sec.querySelector(":scope > h2").click() }
 function focusPlace(id) {
   const p = PLACES[id]; if (!p?.ll) return;
+  openSec($("map"));
   map.setView(p.ll, 15); markers[id]?.openPopup();
   $("map").scrollIntoView({ behavior: "smooth", block: "center" });
 }
@@ -235,7 +237,7 @@ $("tabs").onclick = e => { const b = e.target.closest(".tab"); if (!b) return; c
 $("daypanel").onclick = e => {
   const cb = e.target.closest("input"); if (cb) { done[cb.dataset.k] = cb.checked; store.set("ist-done", done); renderDay(); return }
   const n = e.target.closest(".name"); if (n) focusPlace(n.dataset.p);
-  const f = e.target.closest("[data-food]"); if (f) { e.preventDefault(); const el = $("food-" + f.dataset.food); if (el) { el.scrollIntoView({ behavior: "smooth", block: "center" }); el.classList.add("flash"); setTimeout(() => el.classList.remove("flash"), 1500) } }
+  const f = e.target.closest("[data-food]"); if (f) { e.preventDefault(); const el = $("food-" + f.dataset.food); openSec(el); if (el) { el.scrollIntoView({ behavior: "smooth", block: "center" }); el.classList.add("flash"); setTimeout(() => el.classList.remove("flash"), 1500) } }
 };
 
 // ---------- Swipen ----------
@@ -656,20 +658,22 @@ window.addEventListener("hashchange", admRender);
 
 // ---------- Bereiche ein-/ausklappen ----------
 (() => {
-  const closed = store.get("ist-collapsed", []);
+  const open = store.get("ist-open", []);
   document.querySelectorAll("main > section.card").forEach((sec, i) => {
     const h2 = sec.querySelector(":scope > h2"); if (!h2) return;
     const key = sec.id || "sec" + i, body = document.createElement("div"); body.className = "card-body";
     while (h2.nextSibling) body.appendChild(h2.nextSibling);
     sec.appendChild(body);
-    if (closed.includes(key)) sec.classList.add("collapsed");
+    if (!open.includes(key)) sec.classList.add("collapsed");
     h2.onclick = () => {
       sec.classList.toggle("collapsed");
-      const now = store.get("ist-collapsed", []).filter(k => k !== key); if (sec.classList.contains("collapsed")) now.push(key); store.set("ist-collapsed", now);
+      const now = store.get("ist-open", []).filter(k => k !== key); if (!sec.classList.contains("collapsed")) now.push(key); store.set("ist-open", now);
       if (!sec.classList.contains("collapsed") && sec.querySelector("#map")) setTimeout(() => map.invalidateSize(), 50);
     };
   });
 })();
+
+document.addEventListener("click", e => { const a = e.target.closest('a[href^="#"]'); if (!a || a.getAttribute("href") === "#admin") return; const t = document.querySelector(a.getAttribute("href")); if (t && t.classList.contains("collapsed")) t.querySelector(":scope > h2").click() }, true);
 
 // ---------- Start ----------
 async function refreshAll() { if (document.visibilityState !== "visible") return; await pull(); loadIdeas(); if (!me || doneV(myVotes)) renderSwipe() }
