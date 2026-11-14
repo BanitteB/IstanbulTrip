@@ -654,6 +654,23 @@ $("ed-geo").onclick = geoSearch; $("ed-gm-go").onclick = parseGmaps; $("ed-img")
 $("ed-save").onclick = saveSpot; $("ed-cancel").onclick = () => { $("ed").style.display = "none" };
 window.addEventListener("hashchange", admRender);
 
+// ---------- Bereiche ein-/ausklappen ----------
+(() => {
+  const closed = store.get("ist-collapsed", []);
+  document.querySelectorAll("main > section.card").forEach((sec, i) => {
+    const h2 = sec.querySelector(":scope > h2"); if (!h2) return;
+    const key = sec.id || "sec" + i, body = document.createElement("div"); body.className = "card-body";
+    while (h2.nextSibling) body.appendChild(h2.nextSibling);
+    sec.appendChild(body);
+    if (closed.includes(key)) sec.classList.add("collapsed");
+    h2.onclick = () => {
+      sec.classList.toggle("collapsed");
+      const now = store.get("ist-collapsed", []).filter(k => k !== key); if (sec.classList.contains("collapsed")) now.push(key); store.set("ist-collapsed", now);
+      if (!sec.classList.contains("collapsed") && sec.querySelector("#map")) setTimeout(() => map.invalidateSize(), 50);
+    };
+  });
+})();
+
 // ---------- Start ----------
 async function refreshAll() { if (document.visibilityState !== "visible") return; await pull(); loadIdeas(); if (!me || doneV(myVotes)) renderSwipe() }
 (async () => {
