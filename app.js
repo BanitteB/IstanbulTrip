@@ -624,6 +624,7 @@ $("adm-go").onclick = async () => {
   else $("adm-msg").textContent = "❌ Falsches Passwort";
 };
 $("adm-pw").onkeydown = e => e.key === "Enter" && $("adm-go").click();
+$("adm-prompt").onclick = () => { const p = prompt("Admin-Passwort"); if (p) { $("adm-pw").value = p; $("adm-go").click() } };
 $("adm-savepack").onclick = async () => {
   const g = textToPack($("adm-pack").value);
   try { await rpc("admin_set_pack", { g }); $("adm-packmsg").textContent = "✅ Gespeichert, alle sehen die neue Liste"; PACK = g; renderPack() } catch (e) { $("adm-packmsg").textContent = "❌ " + e.message }
