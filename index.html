@@ -277,27 +277,6 @@ footer{text-align:center;color:var(--muted);font-size:.78rem;padding:10px 0 30px
     <div id="pack"></div>
   </section>
 
-  <section class="card span2" id="notfall">
-    <h2>🆘 Notfall & Infos</h2>
-    <div class="nf">
-      <div class="nf-taxi" id="taxi-card">
-        <span class="muted">🚕 Fürs Taxi zeigen</span>
-        <p class="nf-tr">Beni bu adrese götürür müsünüz?</p>
-        <p class="nf-addr">Otel Kadıköy<br>Uzun Hafız Sokak No: 18<br>Osmanağa, Kadıköy / İstanbul</p>
-        <p class="muted" style="margin:0">„Können Sie mich zu dieser Adresse bringen?“</p>
-        <div class="nf-btns">
-          <button class="btn small" id="taxi-full">⛶ Gross anzeigen</button>
-          <button class="btn ghost small" id="taxi-copy">📋 Adresse kopieren</button>
-          <a class="btn ghost small" href="https://www.google.com/maps/search/?api=1&query=Otel+Kad%C4%B1k%C3%B6y+Uzun+Haf%C4%B1z+Sokak+18+Kad%C4%B1k%C3%B6y" target="_blank" rel="noopener">🗺️ Google Maps</a>
-        </div>
-      </div>
-      <div class="nf-sos">
-        <p style="margin:0"><b>Notruf: 112</b><br>Polizei, Ambulanz und Feuerwehr, kostenlos von jedem Handy.</p>
-        <p class="muted" style="margin:6px 0 0">Hilfe! = <b>İmdat!</b> · Ich brauche einen Arzt = <b>Doktora ihtiyacım var</b></p>
-      </div>
-    </div>
-  </section>
-
   <section class="card span2">
     <h2>🗣️ Türkisch für unterwegs</h2>
     <p class="daynote" style="margin-top:-4px">ş = „sch“ · ç = „tsch“ · c = „dsch“ · ı = dumpfes „e“ · ğ wird fast verschluckt · 🔊 zum Anhören</p>
@@ -365,6 +344,27 @@ footer{text-align:center;color:var(--muted);font-size:.78rem;padding:10px 0 30px
     <div class="routes" id="routes"></div>
     <p class="muted" style="margin:10px 0 0">Bezahlen mit der Istanbulkart-App. Bei jedem Ort im Plan und auf der Karte gibt es „🚇 Route“: öffnet Google Maps mit Metro, Tram, Bus und Fähre.</p>
   </section>
+
+  <section class="card span2" id="notfall">
+    <h2>🆘 Notfall & Infos</h2>
+    <div class="nf">
+      <div class="nf-taxi" id="taxi-card">
+        <span class="muted">🚕 Fürs Taxi zeigen</span>
+        <p class="nf-tr">Beni bu adrese götürür müsünüz?</p>
+        <p class="nf-addr">Otel Kadıköy<br>Uzun Hafız Sokak No: 18<br>Osmanağa, Kadıköy / İstanbul</p>
+        <p class="muted" style="margin:0">„Können Sie mich zu dieser Adresse bringen?“</p>
+        <div class="nf-btns">
+          <button class="btn small" id="taxi-full">⛶ Gross anzeigen</button>
+          <button class="btn ghost small" id="taxi-copy">📋 Adresse kopieren</button>
+          <a class="btn ghost small" href="https://www.google.com/maps/search/?api=1&query=Otel+Kad%C4%B1k%C3%B6y+Uzun+Haf%C4%B1z+Sokak+18+Kad%C4%B1k%C3%B6y" target="_blank" rel="noopener">🗺️ Google Maps</a>
+        </div>
+      </div>
+      <div class="nf-sos">
+        <p style="margin:0"><b>Notruf: 112</b><br>Polizei, Ambulanz und Feuerwehr, kostenlos von jedem Handy.</p>
+        <p class="muted" style="margin:6px 0 0">Hilfe! = <b>İmdat!</b> · Ich brauche einen Arzt = <b>Doktora ihtiyacım var</b></p>
+      </div>
+    </div>
+  </section>
 </main>
 <div id="admin" class="adm-overlay" style="display:none"><section class="card adm-box">
   <div style="display:flex;justify-content:space-between;align-items:center"><h2 style="margin:0">🔧 Admin</h2><button class="btn ghost small" id="adm-close">✕ Schliessen</button></div>
@@ -420,6 +420,6 @@ footer{text-align:center;color:var(--muted);font-size:.78rem;padding:10px 0 30px
 
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="app.js?v=32"></script>
+<script src="app.js?v=33"></script>
 </body>
 </html>
