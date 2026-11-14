@@ -488,6 +488,27 @@ function renderPack() {
   document.querySelectorAll("[data-pk]").forEach(c => c.onchange = () => { st[c.dataset.pk] = c.checked; store.set(k, st); renderPack() });
 }
 
+// ---------- Ideen & Kommentare ----------
+let IDEAS = [];
+async function loadIdeas() { if (!db) return; const { data, error } = await db.from("ideas").select("id,name,text,created_at").eq("trip", TRIP).order("created_at", { ascending: false }); if (!error) { IDEAS = data; renderIdeas() } }
+function renderIdeas() {
+  const who = me || store.get("ist-idea-name", "");
+  const isAdm = !!admPw;
+  $("ideas").innerHTML = `<div class="idea-form">
+      <select id="idea-name">${TRAVELERS.map(n => `<option ${n === who ? "selected" : ""}>${esc(n)}</option>`).join("")}</select>
+      <textarea id="idea-text" rows="2" maxlength="600" placeholder="Idee, Wunsch oder Kommentar …"></textarea>
+      <button class="btn" id="idea-send">Posten</button></div>
+    <div class="idea-list">${IDEAS.length ? IDEAS.map(i => `<div class="idea"><div class="idea-h"><b>${esc(i.name)}</b><span class="muted">${new Date(i.created_at).toLocaleString("de-CH", { weekday: "short", day: "numeric", month: "numeric", hour: "2-digit", minute: "2-digit" })}</span>${isAdm ? `<button class="idea-del" data-del-idea="${i.id}" title="Löschen (Admin)">🗑️</button>` : ""}</div><div>${esc(i.text).replace(/\n/g, "<br>")}</div></div>`).join("") : '<p class="muted">Noch nichts gepostet.</p>'}</div>`;
+  $("idea-send").onclick = async () => {
+    const name = $("idea-name").value, text = $("idea-text").value.trim(); if (!text) return $("idea-text").focus();
+    store.set("ist-idea-name", name); $("idea-send").disabled = true;
+    const { error } = await db.from("ideas").insert({ trip: TRIP, name, text });
+    if (error) { alert("Konnte nicht speichern: " + error.message); $("idea-send").disabled = false; return }
+    await loadIdeas();
+  };
+  $("ideas").querySelectorAll("[data-del-idea]").forEach(b => b.onclick = async () => { if (!confirm("Diesen Beitrag löschen?")) return; try { await rpc("admin_delete_idea", { iid: +b.dataset.delIdea }); loadIdeas() } catch (e) { alert(e.message) } });
+}
+
 // ---------- Admin ----------
 let admPw = (() => { try { return sessionStorage.getItem("ist-adm") || "" } catch (e) { return "" } })();
 let editId = null, edImg = null;
@@ -616,13 +637,13 @@ $("ed-save").onclick = saveSpot; $("ed-cancel").onclick = () => { $("ed").style.
 window.addEventListener("hashchange", admRender);
 
 // ---------- Start ----------
-async function refreshAll() { if (document.visibilityState !== "visible") return; await pull(); if (!me || doneV(myVotes)) renderSwipe() }
+async function refreshAll() { if (document.visibilityState !== "visible") return; await pull(); loadIdeas(); if (!me || doneV(myVotes)) renderSwipe() }
 (async () => {
   await loadSpots();
   renderMarkers(); renderTabs(); renderDay(); renderFilters(); renderPlaces(); renderTips(); renderRoutes(); renderFood(); renderPack(); renderPhrases(); loadWeather();
   $("rail").onchange = e => toggleRail(e.target.checked);
   if (db) db.from("packlist").select("groups").eq("trip", TRIP).maybeSingle().then(({ data }) => { if (data?.groups?.length) { PACK = data.groups; renderPack() } });
-  await pull(); renderSwipe(); admRender();
+  await pull(); renderSwipe(); admRender(); loadIdeas();
   setInterval(refreshAll, 15000);
   document.addEventListener("visibilitychange", refreshAll);
 })();
