@@ -64,7 +64,7 @@ let SPOTS = {}, PLACES = {}, SPOTS_FROM_DB = false;
 async function loadSpots() {
   let rows = null;
   if (db) { const { data, error } = await db.from("places").select("id,data,sort").eq("trip", TRIP).order("sort"); if (!error && data.length && data.some(r => r.data.kind === "quarter")) { rows = data; SPOTS_FROM_DB = true } }
-  if (!rows) { try { rows = await fetch("defaults.json?v=22").then(r => r.json()) } catch (e) { rows = [] } SPOTS_FROM_DB = false }
+  if (!rows) { try { rows = await fetch("defaults.json?v=23").then(r => r.json()) } catch (e) { rows = [] } SPOTS_FROM_DB = false }
   SPOTS = {}; rows.forEach(r => SPOTS[r.id] = { ...r.data, sort: r.sort || 0 });
   PLACES = { ...BASE }; Object.entries(SPOTS).forEach(([id, s]) => PLACES[id] = s);
 }
@@ -118,9 +118,9 @@ const roundIds = (k, v) => k === "quarter" ? QIDS() : k === "pick" ? [...kindIds
 const likedQ = v => QIDS().filter(q => (v?.[q] ?? 0) > 0 && Object.keys(SPOTS).some(id => SPOTS[id].q === q));
 const qSpots = q => [...kindIds("act"), ...kindIds("food")].filter(id => SPOTS[id].q === q);
 const qDone = (q, v) => qSpots(q).every(id => v?.[id] !== undefined);
-const requiredIds = v => [...QIDS(), ...roundIds("act", v), ...roundIds("food", v)];
+const requiredIds = v => kindIds("act");
 const doneIds = (v, ids) => !!v && ids.every(id => v[id] !== undefined);
-const doneV = v => doneIds(v, QIDS()) && doneIds(v, requiredIds(v));
+const doneV = v => doneIds(v, kindIds("act"));
 const progress = v => { const r = requiredIds(v || {}); return [r.filter(id => v && v[id] !== undefined).length, r.length] };
 
 async function pull() {
@@ -145,29 +145,23 @@ function push() {
 // ---------- Auswertung & Plan ----------
 function evaluate() {
   const N = TRAVELERS.length, need = Math.ceil(N * 2 / 3);
-  const qv = id => TRAVELERS.map(n => everyone[n]?.[id] ?? 0);
-  const quarters = QIDS().map(id => { const vs = qv(id); return { id, vs, yes: vs.filter(v => v > 0).length, score: vs.reduce((a, b) => a + b, 0), star: vs.includes(2) } });
-  quarters.forEach(r => r.chosen = r.yes >= need || r.star);
-  const qChosen = new Set(quarters.filter(r => r.chosen).map(r => r.id));
-  const spot = id => { const q = SPOTS[id].q, voters = TRAVELERS.filter(n => (everyone[n]?.[q] ?? 0) > 0);
-    const vs = TRAVELERS.map(n => voters.includes(n) ? (everyone[n]?.[id] ?? 0) : null);
-    const yes = vs.filter(v => v > 0).length, star = vs.includes(2), score = vs.reduce((a, b) => a + (b || 0), 0);
-    return { id, vs, yes, star, score, voters: voters.length, chosen: qChosen.has(q) && voters.length > 0 && (yes * 2 >= voters.length || star) } };
-  const sortS = (a, b) => b.score - a.score || bySort(a.id, b.id);
-  return { quarters, qChosen, acts: kindIds("act").map(spot).sort(sortS), food: kindIds("food").map(spot).sort(sortS) };
+  const acts = kindIds("act").map(id => { const vs = TRAVELERS.map(n => everyone[n]?.[id] ?? 0);
+    const yes = vs.filter(v => v > 0).length, star = vs.includes(2);
+    return { id, vs, yes, star, score: vs.reduce((a, b) => a + b, 0), chosen: yes >= need || star } }).sort((a, b) => b.score - a.score || bySort(a.id, b.id));
+  const qChosen = new Set(acts.filter(r => r.chosen).map(r => SPOTS[r.id].q));
+  return { acts, qChosen };
 }
 function computePlan() {
-  const allDone = QIDS().length && TRAVELERS.every(n => doneV(everyone[n]));
+  const allDone = kindIds("act").length && TRAVELERS.every(n => doneV(everyone[n]));
   if (!allDone) { if (planResult) { planResult = null; renderDay() } return }
   const E = evaluate(), days = {}, extra = [];
   DAYS.forEach(d => days[d.key] = []);
-  // Viertel auf Tage verteilen
+  // Viertel mit gewählten Sehenswürdigkeiten auf Fr/Sa verteilen
   const dayQ = { fr: [], sa: [] };
   ["fr", "sa"].forEach(d => GEO_ORDER[d].forEach(q => { if (E.qChosen.has(q)) dayQ[d].push(q) }));
-  QIDS().forEach(q => { const day = SPOTS[q].day; if (!E.qChosen.has(q) || q === "q_kad") return;
+  QIDS().forEach(q => { const day = SPOTS[q].day; if (!E.qChosen.has(q) || day === "kad") return;
     if (day === "fr" || day === "sa") { if (!dayQ[day].includes(q)) dayQ[day].push(q) }
-    else { const load = d => dayQ[d].reduce((a, x) => a + E.acts.filter(r => r.chosen && SPOTS[r.id].q === x).length + 1, 0); dayQ[load("fr") <= load("sa") ? "fr" : "sa"].push(q) } });
-  // Aktivitäten
+    else { const load = d => dayQ[d].reduce((a, x) => a + E.acts.filter(r => r.chosen && SPOTS[r.id].q === x).length, 0); dayQ[load("fr") <= load("sa") ? "fr" : "sa"].push(q) } });
   ["fr", "sa"].forEach(d => {
     let n = 0;
     dayQ[d].forEach((q, k) => {
@@ -178,23 +172,17 @@ function computePlan() {
     });
     const half = days[d].find(x => x.quarter && x.pos >= 100); if (half) half.t = "Nachmittag";
   });
-  if (E.qChosen.has("q_kad")) E.acts.filter(r => r.chosen && SPOTS[r.id].q === "q_kad").forEach((r, i) => days[i % 2 ? "do" : "so"].push({ ...r, pos: i % 2 ? 870 : 0, t: "" }));
-  // Essen in passende Mahlzeiten
-  const used = new Set();
-  DAYS.forEach(d => (MEALSLOTS[d.key] || []).forEach(([t, meals, where, pos]) => {
-    const areas = where.split("|").flatMap(w => w === "day" ? (dayQ[d.key] || []) : ["q_kad"]);
-    const fits = r => !used.has(r.id) && areas.includes(SPOTS[r.id].q) && (SPOTS[r.id].meals || []).some(m => meals.includes(m));
-    const pick = areas.map(a => E.food.find(r => r.chosen && SPOTS[r.id].q === a && fits(r))).find(Boolean);
-    if (pick) { used.add(pick.id); days[d.key].push({ ...pick, pos, t, meal: SPOTS[pick.id].meals.find(m => meals.includes(m)) }) }
-  }));
-  E.food.filter(r => r.chosen && !used.has(r.id)).forEach(r => extra.push(r));
+  // Sehenswürdigkeiten in Hotelnähe (Tag "kad"): Do-Abend / So-Morgen
+  E.acts.filter(r => r.chosen && SPOTS[SPOTS[r.id].q]?.day === "kad").forEach((r, i) => days[i % 2 ? "do" : "so"].push({ ...r, pos: i % 2 ? 870 : 0, t: i % 2 ? "Abend" : "Morgen" }));
+  // Restaurant-Ideen in der Nähe (ohne Swipen)
+  const kadQ = QIDS().filter(q => SPOTS[q].day === "kad");
+  const food = {}; DAYS.forEach(d => { const qs = d.key === "fr" || d.key === "sa" ? [...dayQ[d.key], ...kadQ] : kadQ; food[d.key] = kindIds("food").filter(id => qs.includes(SPOTS[id].q)) });
   DAYS.forEach(d => days[d.key].sort((a, b) => a.pos - b.pos));
   const titles = { fr: dayQ.fr.map(q => SPOTS[q].n).join(" · ") || "Freier Tag", sa: dayQ.sa.map(q => SPOTS[q].n).join(" · ") || "Freier Tag" };
   const before = JSON.stringify(planResult);
-  planResult = { days, extra, titles };
+  planResult = { days, extra, titles, food };
   if (JSON.stringify(planResult) !== before) renderDay();
 }
-
 // ---------- Plan anzeigen ----------
 let done = store.get("ist-done", {});
 let curDay = (() => { const t = new Date().toLocaleDateString("sv-SE", { timeZone: "Europe/Istanbul" }); const i = DAYS.findIndex(d => d.date === t); return i < 0 ? 1 : i })();
@@ -209,7 +197,8 @@ function renderDay() {
   const d = DAYS[curDay], stops = dayStops(d);
   const title = planResult?.titles?.[d.key] || d.title;
   const locked = !planResult ? `<div class="wtip" style="margin:10px 0">🔒 Das Programm entsteht, sobald ${TRAVELERS.join(", ")} geswipt haben. <a href="#swipe-card">Zum Swipen ↓</a></div>` : "";
-  const extra = planResult && curDay === DAYS.length - 1 && planResult.extra.length ? `<div class="wtip" style="margin-top:10px">✨ Wenn Zeit bleibt: ${planResult.extra.map(r => esc(SPOTS[r.id].n)).join(", ")}</div>` : "";
+  const extra = (planResult && curDay === DAYS.length - 1 && planResult.extra.length ? `<div class="wtip" style="margin-top:10px">✨ Wenn Zeit bleibt: ${planResult.extra.map(r => esc(SPOTS[r.id].n)).join(", ")}</div>` : "") +
+    (planResult && planResult.food[d.key]?.length ? `<div class="wtip" style="margin-top:10px">🍽️ Essen in der Nähe: ${planResult.food[d.key].map(id => `<a href="#food-card" data-food="${esc(id)}">${esc(SPOTS[id].n)}</a>`).join(" · ")}</div>` : "");
   $("daypanel").innerHTML = `<p class="daytitle">${esc(title)}</p><p class="daynote">${d.note}</p>` +
     stops.map(s => { const k = d.key + "-" + s.p + "-" + s.t, p = PLACES[s.p]; if (!p) return ""; return `<div class="stop ${done[k] ? "done" : ""}${s.quarter ? " qstop" : ""}">
       <input type="checkbox" data-k="${esc(k)}" ${done[k] ? "checked" : ""} aria-label="erledigt">
@@ -222,6 +211,7 @@ $("tabs").onclick = e => { const b = e.target.closest(".tab"); if (!b) return; c
 $("daypanel").onclick = e => {
   const cb = e.target.closest("input"); if (cb) { done[cb.dataset.k] = cb.checked; store.set("ist-done", done); renderDay(); return }
   const n = e.target.closest(".name"); if (n) focusPlace(n.dataset.p);
+  const f = e.target.closest("[data-food]"); if (f) { e.preventDefault(); const el = $("food-" + f.dataset.food); if (el) { el.scrollIntoView({ behavior: "smooth", block: "center" }); el.classList.add("flash"); setTimeout(() => el.classList.remove("flash"), 1500) } }
 };
 
 // ---------- Swipen ----------
@@ -233,15 +223,13 @@ function statusLine() {
 }
 async function renderSwipe() {
   if (!me) return renderStart();
-  if (curCat === "pick") { if (pickQ || likedQ(myVotes).some(q => !qDone(q, myVotes))) return renderPick(); curCat = null }
-  if (curCat === "quarter" && !doneIds(myVotes, QIDS())) return renderStack();
-  if (!doneV(myVotes)) return renderCats();
+  if (!doneV(myVotes)) return renderStack();
   await pull(); renderResults();
 }
 async function renderStart() {
   await pull();
   swEl.innerHTML = `<div class="sw-center">
-    <p>Zwei Runden: zuerst die <b>Viertel</b> swipen (❤️ / ✕ / ⭐), dann pro Viertel <b>antippen, was ihr sehen & essen</b> wollt.</p>
+    <p>Swipe durch die <b>Sehenswürdigkeiten</b>: ❤️ will ich · ✕ eher nicht · ⭐ unbedingt.<br>Sobald alle drei fertig sind, erscheint oben euer Programm. Restaurant-Ideen findet ihr weiter unten.</p>
     <p style="font-weight:600;margin:14px 0 8px">Wer swipt?</p>
     <div style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap">${TRAVELERS.map(n => `<button class="btn" data-me="${esc(n)}" style="min-width:90px">${esc(n)}</button>`).join("")}</div>
     <p class="daynote" style="margin-top:14px">${statusLine()}</p></div>`;
@@ -312,22 +300,20 @@ function renderIntro(q, count) {
   $("sw-back").onclick = () => { curCat = null; renderSwipe() };
 }
 function renderStack() {
-  const ids = roundIds(curCat, myVotes), todo = ids.filter(id => myVotes[id] === undefined);
-  if (!todo.length) { curCat = null; return renderSwipe() }
-  if (curCat !== "quarter") { const q = SPOTS[todo[0]].q; if (!introSeen.has(curCat + q)) return renderIntro(q, todo.filter(id => SPOTS[id].q === q).length) }
+  const ids = kindIds("act"), todo = ids.filter(id => myVotes[id] === undefined);
+  if (!todo.length) return renderSwipe();
   const pct = Math.round((ids.length - todo.length) / ids.length * 100);
-  const sameQ = curCat === "quarter" || (todo[1] && SPOTS[todo[1]].q === SPOTS[todo[0]].q);
-  swEl.innerHTML = `<div class="sw-who">${esc(me)} · ${ROUNDS.find(r => r[0] === curCat)[1]} · ${ids.length - todo.length + 1}/${ids.length}</div>
+  swEl.innerHTML = `<div class="sw-who">${esc(me)} · 🎯 Sehenswürdigkeiten · ${ids.length - todo.length + 1}/${ids.length}</div>
     <div class="sw-progress"><div style="width:${pct}%"></div></div>
-    <div class="stack${curCat === "quarter" ? " tall" : ""}">${todo[1] && sameQ ? cardHtml(todo[1], true) : ""}${cardHtml(todo[0])}</div>
+    <div class="stack tall">${todo[1] ? cardHtml(todo[1], true) : ""}${cardHtml(todo[0])}</div>
     <div class="sw-btns"><button class="sw-btn" data-v="0" aria-label="Nein">✕</button><button class="sw-btn star" data-v="2" aria-label="Unbedingt">⭐</button><button class="sw-btn" data-v="1" aria-label="Ja">❤️</button></div>
-    <div class="sw-center"><button class="btn ghost small" id="sw-undo">↩︎ Zurück</button> <button class="btn ghost small" id="sw-back">Runde wechseln</button></div>`;
+    <div class="sw-center"><button class="btn ghost small" id="sw-undo">↩︎ Zurück</button> <button class="btn ghost small" id="sw-who">Nicht ${esc(me)}?</button></div>`;
   const top = swEl.querySelector(".stack .sw-card:last-child"), stamp = top.querySelector(".stamp");
   top.querySelectorAll("a").forEach(a => a.addEventListener("pointerdown", e => e.stopPropagation()));
   const vote = v => { top.style.transform = v === 2 ? "translateY(-600px)" : `translateX(${v ? 600 : -600}px) rotate(${v ? 25 : -25}deg)`; myVotes[top.dataset.id] = v; push(); setTimeout(renderSwipe, 220) };
   swEl.querySelectorAll(".sw-btn").forEach(b => b.onclick = () => vote(+b.dataset.v));
   $("sw-undo").onclick = () => { const d = ids.filter(id => myVotes[id] !== undefined); if (d.length) { delete myVotes[d[d.length - 1]]; push(); renderStack() } };
-  $("sw-back").onclick = () => { curCat = null; renderSwipe() };
+  $("sw-who").onclick = switchUser;
   let x0 = null, y0 = 0;
   top.addEventListener("pointerdown", e => { x0 = e.clientX; y0 = e.clientY; top.classList.add("drag"); top.setPointerCapture(e.pointerId) });
   top.addEventListener("pointermove", e => { if (x0 === null) return; const dx = e.clientX - x0, dy = Math.min(0, e.clientY - y0);
@@ -340,15 +326,12 @@ function renderStack() {
 function switchUser() { me = ""; myVotes = {}; curCat = null; introSeen = new Set(); store.set("ist-me", ""); store.set("ist-myvotes", {}); renderSwipe(); renderPack() }
 function renderResults() {
   const allDone = TRAVELERS.every(n => doneV(everyone[n]));
-  const icon = v => v === 2 ? "⭐" : v === 1 ? "❤️" : v === 0 ? "✕" : "–";
-  const votes = r => `<span class="votes">${r.vs.map((v, i) => `${esc(TRAVELERS[i])} ${icon(v)}`).join(" · ")}</span>`;
+  const icon = v => v === 2 ? "⭐" : v === 1 ? "❤️" : "✕";
   let body = "";
   if (allDone) {
     const E = evaluate();
-    body = `<p class="daytitle">🎉 Alle haben geswipt! Euer Programm steht oben im Plan.</p>
-      <h3 style="margin:14px 0 4px">🗺️ Viertel</h3>${E.quarters.map(r => `<div class="res-item"><span>${r.chosen ? "✅" : "❌"} <span class="pn" data-p="${esc(r.id)}">${esc(SPOTS[r.id].n)}</span></span>${votes(r)}</div>`).join("")}
-      ${E.quarters.filter(r => r.chosen).map(q => { const a = [...E.acts, ...E.food].filter(r => SPOTS[r.id].q === q.id);
-        return a.length ? `<div class="res-group"><h3>📍 ${esc(SPOTS[q.id].n)}</h3>${a.map(r => `<div class="res-item"><span>${r.chosen ? "✅" : "▫️"} ${SPOTS[r.id].kind === "food" ? "🍽️" : "🎯"} <span class="pn" data-p="${esc(r.id)}">${esc(SPOTS[r.id].n)}</span></span>${votes(r)}</div>`).join("")}</div>` : "" }).join("")}`;
+    body = `<p class="daytitle">🎉 Alle haben geswipt! Euer Programm steht oben im Plan.</p>` + QIDS().map(q => { const a = E.acts.filter(r => SPOTS[r.id].q === q);
+      return a.length ? `<div class="res-group"><h3>📍 ${esc(SPOTS[q].n)}</h3>${a.map(r => `<div class="res-item"><span>${r.chosen ? "✅" : "▫️"} <span class="pn" data-p="${esc(r.id)}">${esc(SPOTS[r.id].n)}</span></span><span class="votes">${r.vs.map((v, i) => `${esc(TRAVELERS[i])} ${icon(v)}`).join(" · ")}</span></div>`).join("")}</div>` : "" }).join("");
   } else body = `<div class="sw-center"><p style="font-size:1.1rem">✅ Danke ${esc(me)}, du bist fertig!</p><p>Sobald alle drei durch sind, erscheint oben euer Programm. Diese Seite aktualisiert sich von selbst.</p></div>`;
   swEl.innerHTML = `<p class="daynote" style="text-align:center">${statusLine()}</p>` + body +
     `<div class="sw-center" style="display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin-top:14px">
@@ -356,10 +339,18 @@ function renderResults() {
       <button class="btn ghost" id="sw-redo">Meine Swipes neu machen</button><button class="btn ghost" id="sw-who2">Andere Person</button></div>`;
   swEl.querySelectorAll(".pn").forEach(e => e.onclick = () => focusPlace(e.dataset.p));
   if ($("sw-plan")) $("sw-plan").onclick = () => { curDay = 1; renderTabs(); renderDay(); $("tabs").scrollIntoView({ behavior: "smooth", block: "start" }) };
-  $("sw-redo").onclick = () => { if (confirm("Deine Swipes zurücksetzen und neu swipen?")) { myVotes = {}; introSeen = new Set(); push(); computePlan(); renderSwipe() } };
+  $("sw-redo").onclick = () => { if (confirm("Deine Swipes zurücksetzen und neu swipen?")) { myVotes = {}; push(); computePlan(); renderSwipe() } };
   $("sw-who2").onclick = switchUser;
 }
 
+// ---------- Restaurant-Ideen (ohne Swipen) ----------
+function renderFood() {
+  $("food").innerHTML = QIDS().map(q => { const f = kindIds("food").filter(id => SPOTS[id].q === q); if (!f.length) return "";
+    return `<h3 class="food-q">📍 ${esc(SPOTS[q].n)}</h3><div class="food-grid">${f.map(id => { const s = SPOTS[id], im = s.img;
+      return `<div class="food-item" id="food-${esc(id)}"><div class="food-img" style="${im ? `background-image:url('${esc(im[0])}')` : "background:#c8553d"}">${im && im[4] === "ex" ? '<span class="ex">Beispielbild</span>' : ""}</div>
+        <div class="food-b"><b>${esc(s.n)}</b><span>${esc(s.d)}</span><span class="tile-k">${(s.meals || []).map(m => MEAL[m]).join(" · ")}${s.vibe ? " · " + (VIBE[s.vibe] || "") : ""}</span>${s.note ? `<span class="muted">ℹ️ ${esc(s.note)}</span>` : ""}
+        <span class="food-l"><a href="${gmaps(s.n)}" target="_blank" rel="noopener">📸 Google Maps</a>${s.ll ? ` · <a href="${route(s.ll)}" target="_blank" rel="noopener">🚇 Route</a>` : ""}</span></div></div>` }).join("")}</div>` }).join("");
+}
 // ---------- Lieblingsorte ----------
 let favs = store.get("ist-favs", []), filter = "all";
 function renderFilters() {
@@ -463,7 +454,6 @@ let PACK = [
   ["📄 Dokumente", ["Pass oder ID", "Flugtickets / Boarding Pässe", "Hotelbuchung (Otel Kadıköy)", "Krankenkassenkarte / Reiseversicherung"]],
   ["💳 Geld & Handy", ["Kreditkarte + etwas Bargeld (TRY)", "Istanbulkart-App aufgeladen", "Powerbank", "Ladekabel", "Reiseadapter (Schweizer Stecker passen nicht in türkische Steckdosen)"]],
   ["🧥 Kleidung", ["Regenjacke", "Warmer Pulli / Fleece", "Bequeme, wasserfeste Schuhe", "Schal oder Tuch (Kopfbedeckung für Moscheen)", "Lange Hose / Rock über die Knie (Moscheen)", "Etwas Schickes für die Rooftop-Bar", "Pyjama"]],
-  ["🧖 Hamam", ["Bikini / Badeanzug", "Flip-Flops", "Haargummi"]],
   ["🎒 Unterwegs", ["Kleiner Regenschirm", "Tagesrucksack", "Stoffbeutel für den Basar", "Taschentücher", "Sonnenbrille"]],
   ["💊 Pflege", ["Zahnbürste & Zahnpasta", "Medikamente", "Pflaster / Blasenpflaster", "Ohrstöpsel", "Handcreme / Lippenbalsam"]]
 ];
@@ -490,7 +480,7 @@ async function ensureSeeded() {
   for (const [id, s] of Object.entries(SPOTS)) { const { sort, ...d } = s; await rpc("admin_upsert_place", { pid: id, d, s: sort || 0 }) }
   SPOTS_FROM_DB = true;
 }
-async function refreshEverything() { await loadSpots(); renderMarkers(); renderPlaces(); renderTips(); renderRoutes(); await pull(); renderDay(); renderSwipe() }
+async function refreshEverything() { await loadSpots(); renderMarkers(); renderPlaces(); renderTips(); renderRoutes(); renderFood(); await pull(); renderDay(); renderSwipe() }
 async function admRender() {
   if (location.hash !== "#admin") { admEl.style.display = "none"; return }
   admEl.style.display = "flex";
@@ -604,10 +594,10 @@ $("ed-save").onclick = saveSpot; $("ed-cancel").onclick = () => { $("ed").style.
 window.addEventListener("hashchange", admRender);
 
 // ---------- Start ----------
-async function refreshAll() { if (document.visibilityState !== "visible") return; await pull(); if (!me || (doneV(myVotes) && !curCat)) renderSwipe() }
+async function refreshAll() { if (document.visibilityState !== "visible") return; await pull(); if (!me || doneV(myVotes)) renderSwipe() }
 (async () => {
   await loadSpots();
-  renderMarkers(); renderTabs(); renderDay(); renderFilters(); renderPlaces(); renderTips(); renderRoutes(); renderPack(); renderPhrases(); loadWeather();
+  renderMarkers(); renderTabs(); renderDay(); renderFilters(); renderPlaces(); renderTips(); renderRoutes(); renderFood(); renderPack(); renderPhrases(); loadWeather();
   $("rail").onchange = e => toggleRail(e.target.checked);
   if (db) db.from("packlist").select("groups").eq("trip", TRIP).maybeSingle().then(({ data }) => { if (data?.groups?.length) { PACK = data.groups; renderPack() } });
   await pull(); renderSwipe(); admRender();
