@@ -510,6 +510,14 @@ function renderIdeas() {
   $("ideas").querySelectorAll("[data-del-idea]").forEach(b => b.onclick = async () => { if (!confirm("Diesen Beitrag löschen?")) return; try { await rpc("admin_delete_idea", { iid: +b.dataset.delIdea }); loadIdeas() } catch (e) { alert(e.message) } });
 }
 
+function renderAdmIdeas() {
+  const el = $("adm-ideas"); if (!el) return;
+  el.innerHTML = IDEAS.length ? IDEAS.map(i => `<div class="adm-row"><div style="flex:1;min-width:0"><b>${esc(i.name)}</b> <span class="muted">${new Date(i.created_at).toLocaleString("de-CH", { day: "numeric", month: "numeric", hour: "2-digit", minute: "2-digit" })}</span><div style="font-size:.85rem">${esc(i.text)}</div></div>
+    <button class="btn ghost small" data-adm-idea="${i.id}">🗑️</button></div>`).join("") + `<p style="margin-top:8px"><button class="btn ghost small" id="adm-ideas-all" style="color:var(--terra)">Alle Kommentare löschen</button></p>` : '<p class="muted">Noch keine Kommentare.</p>';
+  el.querySelectorAll("[data-adm-idea]").forEach(b => b.onclick = async () => { if (!confirm("Diesen Kommentar löschen?")) return; try { await rpc("admin_delete_idea", { iid: +b.dataset.admIdea }); await loadIdeas(); renderAdmIdeas() } catch (e) { alert(e.message) } });
+  if ($("adm-ideas-all")) $("adm-ideas-all").onclick = async () => { if (!confirm(`Alle ${IDEAS.length} Kommentare löschen?`)) return; try { for (const i of IDEAS) await rpc("admin_delete_idea", { iid: i.id }); await loadIdeas(); renderAdmIdeas() } catch (e) { alert(e.message) } };
+}
+
 // ---------- Admin ----------
 let admPw = (() => { try { return sessionStorage.getItem("ist-adm") || "" } catch (e) { return "" } })();
 let editId = null, edImg = null;
@@ -541,7 +549,7 @@ async function admRender() {
     if (!who || who === me) { myVotes = {}; store.set("ist-myvotes", {}); store.set("ist-pushed", false); curCat = null; introSeen = new Set() }
     everyone = {}; await pull(); renderSwipe(); admRender();
   });
-  renderAdmSpots();
+  renderAdmSpots(); await loadIdeas(); renderAdmIdeas();
   const ta = $("adm-pack"); if (!ta.dataset.loaded) { ta.value = packToText(); ta.dataset.loaded = "1" }
 }
 function renderAdmSpots() {
