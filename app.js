@@ -64,7 +64,7 @@ let SPOTS = {}, PLACES = {}, SPOTS_FROM_DB = false;
 async function loadSpots() {
   let rows = null;
   if (db) { const { data, error } = await db.from("places").select("id,data,sort").eq("trip", TRIP).order("sort"); if (!error && data.length && data.some(r => r.data.kind === "quarter")) { rows = data; SPOTS_FROM_DB = true } }
-  if (!rows) { try { rows = await fetch("defaults.json?v=21").then(r => r.json()) } catch (e) { rows = [] } SPOTS_FROM_DB = false }
+  if (!rows) { try { rows = await fetch("defaults.json?v=22").then(r => r.json()) } catch (e) { rows = [] } SPOTS_FROM_DB = false }
   SPOTS = {}; rows.forEach(r => SPOTS[r.id] = { ...r.data, sort: r.sort || 0 });
   PLACES = { ...BASE }; Object.entries(SPOTS).forEach(([id, s]) => PLACES[id] = s);
 }
@@ -114,7 +114,10 @@ let me = store.get("ist-me", ""); if (me && !TRAVELERS.includes(me)) me = "";
 let myVotes = store.get("ist-myvotes", {});
 let curCat = null, everyone = {}, planResult = null, introSeen = new Set();
 // Runde 2 & 3: nur Orte in Vierteln, zu denen die Person Ja gesagt hat
-const roundIds = (k, v) => k === "quarter" ? QIDS() : kindIds(k).filter(id => (v?.[SPOTS[id].q] ?? 0) > 0);
+const roundIds = (k, v) => k === "quarter" ? QIDS() : k === "pick" ? [...kindIds("act"), ...kindIds("food")].filter(id => (v?.[SPOTS[id].q] ?? 0) > 0) : kindIds(k).filter(id => (v?.[SPOTS[id].q] ?? 0) > 0);
+const likedQ = v => QIDS().filter(q => (v?.[q] ?? 0) > 0 && Object.keys(SPOTS).some(id => SPOTS[id].q === q));
+const qSpots = q => [...kindIds("act"), ...kindIds("food")].filter(id => SPOTS[id].q === q);
+const qDone = (q, v) => qSpots(q).every(id => v?.[id] !== undefined);
 const requiredIds = v => [...QIDS(), ...roundIds("act", v), ...roundIds("food", v)];
 const doneIds = (v, ids) => !!v && ids.every(id => v[id] !== undefined);
 const doneV = v => doneIds(v, QIDS()) && doneIds(v, requiredIds(v));
@@ -223,37 +226,67 @@ $("daypanel").onclick = e => {
 
 // ---------- Swipen ----------
 const swEl = $("swipe");
-const ROUNDS = [["quarter", "🗺️ 1. Viertel", "Wo wollen wir überhaupt hin?"], ["act", "🎯 2. Was sehen", "Was wollen wir dort machen?"], ["food", "🍽️ 3. Essen & Drinks", "Wo wollen wir essen?"]];
+const ROUNDS = [["quarter", "🗺️ 1. Viertel swipen", "Wo wollen wir überhaupt hin?"], ["pick", "✨ 2. Was dort?", "Pro Viertel antippen, was ihr sehen & essen wollt"]];
+let pickQ = null, pickSel = {}, pickInit = null;
 function statusLine() {
   return TRAVELERS.map(n => { const ok = doneV(everyone[n]), [a, b] = progress(everyone[n]); return `<span style="white-space:nowrap">${ok ? "✅" : "⏳"} ${esc(n)}${ok ? "" : ` ${a}/${b}`}</span>` }).join(" &nbsp; ");
 }
 async function renderSwipe() {
   if (!me) return renderStart();
-  if (curCat && !doneIds(myVotes, roundIds(curCat, myVotes))) return renderStack();
+  if (curCat === "pick") { if (pickQ || likedQ(myVotes).some(q => !qDone(q, myVotes))) return renderPick(); curCat = null }
+  if (curCat === "quarter" && !doneIds(myVotes, QIDS())) return renderStack();
   if (!doneV(myVotes)) return renderCats();
   await pull(); renderResults();
 }
 async function renderStart() {
   await pull();
   swEl.innerHTML = `<div class="sw-center">
-    <p>Drei Runden: zuerst die <b>Viertel</b>, dann <b>was ihr dort sehen</b> wollt, dann <b>Essen & Drinks</b>.<br>❤️ will ich · ✕ eher nicht · ⭐ unbedingt</p>
+    <p>Zwei Runden: zuerst die <b>Viertel</b> swipen (❤️ / ✕ / ⭐), dann pro Viertel <b>antippen, was ihr sehen & essen</b> wollt.</p>
     <p style="font-weight:600;margin:14px 0 8px">Wer swipt?</p>
     <div style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap">${TRAVELERS.map(n => `<button class="btn" data-me="${esc(n)}" style="min-width:90px">${esc(n)}</button>`).join("")}</div>
     <p class="daynote" style="margin-top:14px">${statusLine()}</p></div>`;
   swEl.querySelectorAll("[data-me]").forEach(b => b.onclick = () => {
     me = b.dataset.me; store.set("ist-me", me); renderPack();
-    myVotes = { ...(everyone[me] || {}) }; store.set("ist-myvotes", myVotes); curCat = null; introSeen = new Set(); renderSwipe();
+    myVotes = { ...(everyone[me] || {}) }; store.set("ist-myvotes", myVotes); curCat = null; pickQ = null; introSeen = new Set(); renderSwipe();
   });
 }
 function renderCats() {
-  const r1 = doneIds(myVotes, QIDS());
+  const r1 = doneIds(myVotes, QIDS()), lq = likedQ(myVotes), dq = lq.filter(q => qDone(q, myVotes));
+  const qDoneCnt = QIDS().filter(id => myVotes[id] !== undefined).length;
   swEl.innerHTML = `<div class="sw-center"><p class="sw-who">Hallo ${esc(me)}!</p>
-    <div class="rounds">${ROUNDS.map(([k, label, sub], i) => { const ids = roundIds(k, myVotes), d = ids.filter(id => myVotes[id] !== undefined).length, ok = d === ids.length && (k === "quarter" || r1), lock = i > 0 && !r1;
-      return `<button class="round ${ok ? "ok" : ""}" data-cat="${k}" ${lock ? "disabled" : ""}><b>${label}</b><span>${sub}</span><span class="rs">${lock ? "🔒 erst Runde 1" : ok ? "✅ fertig" : `${d}/${ids.length}`}</span></button>` }).join("")}</div>
+    <div class="rounds">
+      <button class="round ${r1 ? "ok" : ""}" data-cat="quarter"><b>${ROUNDS[0][1]}</b><span>${ROUNDS[0][2]}</span><span class="rs">${r1 ? "✅ fertig" : `${qDoneCnt}/${QIDS().length}`}</span></button>
+      <button class="round ${r1 && dq.length === lq.length ? "ok" : ""}" data-cat="pick" ${r1 ? "" : "disabled"}><b>${ROUNDS[1][1]}</b><span>${ROUNDS[1][2]}</span><span class="rs">${!r1 ? "🔒 erst Runde 1" : dq.length === lq.length ? "✅ fertig" : `${dq.length}/${lq.length} Viertel`}</span></button>
+    </div>
+    ${r1 && dq.length ? `<p class="daynote" style="margin-top:12px">Nochmal ändern: ${dq.map(q => `<button class="btn ghost small" data-editq="${esc(q)}">✏️ ${esc(SPOTS[q].n)}</button>`).join(" ")}</p>` : ""}
     <p class="daynote" style="margin-top:14px">${statusLine()}</p>
     <button class="btn ghost small" id="sw-who">Nicht ${esc(me)}?</button></div>`;
-  swEl.querySelectorAll("[data-cat]:not([disabled])").forEach(b => b.onclick = () => { curCat = b.dataset.cat; renderSwipe() });
+  swEl.querySelectorAll("[data-cat]:not([disabled])").forEach(b => b.onclick = () => { curCat = b.dataset.cat; pickQ = null; renderSwipe() });
+  swEl.querySelectorAll("[data-editq]").forEach(b => b.onclick = () => { curCat = "pick"; pickQ = b.dataset.editq; renderSwipe() });
   $("sw-who").onclick = switchUser;
+}
+function renderPick() {
+  const lq = likedQ(myVotes);
+  const q = pickQ || lq.find(x => !qDone(x, myVotes)); if (!q) { curCat = null; pickQ = null; return renderSwipe() }
+  if (pickInit !== q) { pickSel = {}; qSpots(q).forEach(id => { if ((myVotes[id] ?? 0) > 0) pickSel[id] = myVotes[id] }); pickInit = q }
+  pickQ = q;
+  const s = SPOTS[q], idx = lq.indexOf(q) + 1;
+  const tile = id => { const p = SPOTS[id], v = pickSel[id] || 0, im = p.img;
+    return `<button class="tile ${v ? "sel" : ""} ${v === 2 ? "star" : ""}" data-t="${esc(id)}">
+      <div class="tile-img" style="${im ? `background-image:url('${esc(im[0])}')` : `background:${p.kind === "food" ? "#c8553d" : "#1d5c7a"}`}">${im && im[4] === "ex" ? '<span class="ex">Beispielbild</span>' : ""}<span class="tile-v">${v === 2 ? "⭐" : v ? "❤️" : "＋"}</span></div>
+      <div class="tile-b"><span class="tile-k">${p.kind === "food" ? "🍽️ " + (p.meals || []).map(m => MEAL[m]).join(" / ") : "🎯 Sehenswert"}</span><b>${esc(p.n)}</b><span>${esc(p.d)}</span>${p.note ? `<span class="muted">ℹ️ ${esc(p.note)}</span>` : ""}</div></button>` };
+  const acts = qSpots(q).filter(id => SPOTS[id].kind === "act"), food = qSpots(q).filter(id => SPOTS[id].kind === "food");
+  swEl.innerHTML = `<div class="sw-who">${esc(me)} · Viertel ${idx}/${lq.length}</div>
+    <div class="pick-head" style="${s.img ? `background-image:linear-gradient(180deg,rgba(15,42,67,.15),rgba(15,42,67,.85)),url('${esc(s.img[0])}')` : "background:#7b4fa0"}"><span class="intro-k">Was wollt ihr in</span><h3>${esc(s.n)}</h3><p>${esc(s.d)}</p></div>
+    <p class="daynote" style="text-align:center;margin:10px 0">Antippen: einmal ❤️ · zweimal ⭐ unbedingt · dreimal wieder weg</p>
+    ${acts.length ? `<h4 class="pick-h">🎯 Sehen & machen</h4><div class="tiles">${acts.map(tile).join("")}</div>` : ""}
+    ${food.length ? `<h4 class="pick-h">🍽️ Essen & Drinks</h4><div class="tiles">${food.map(tile).join("")}</div>` : ""}
+    <div class="sw-center" style="margin-top:14px;display:flex;gap:8px;justify-content:center;flex-wrap:wrap">
+      <button class="btn" id="pick-ok">${Object.keys(pickSel).length ? `${Object.keys(pickSel).length} ausgewählt · weiter →` : "Nichts davon · weiter →"}</button>
+      <button class="btn ghost" id="pick-back">Zurück zur Übersicht</button></div>`;
+  swEl.querySelectorAll("[data-t]").forEach(b => b.onclick = () => { const id = b.dataset.t, v = pickSel[id] || 0; if (v === 2) delete pickSel[id]; else pickSel[id] = v + 1; renderPick() });
+  $("pick-ok").onclick = () => { qSpots(q).forEach(id => myVotes[id] = pickSel[id] || 0); push(); pickQ = null; pickSel = {}; pickInit = null; swEl.scrollIntoView({ behavior: "smooth", block: "start" }); renderSwipe() };
+  $("pick-back").onclick = () => { pickQ = null; pickSel = {}; pickInit = null; curCat = null; renderSwipe() };
 }
 function cardHtml(id, back) {
   const s = SPOTS[id], im = s.img, quarter = s.kind === "quarter";
@@ -265,7 +298,7 @@ function cardHtml(id, back) {
     <h3>${esc(s.n)}</h3><p>${esc(s.d)}</p>${chips}
     ${quarter && s.tip ? `<p class="sw-tip">💡 ${esc(s.tip)}</p>` : ""}${!quarter && s.note ? `<p class="sw-tip">ℹ️ ${esc(s.note)}</p>` : ""}
     ${im ? `<a class="sw-gmaps" href="${gmaps(s.n)}" target="_blank" rel="noopener">📸 Mehr Fotos</a>` : ""}
-    ${im && im[2] ? `<a class="sw-credit" href="${esc(im[1] || im[0])}" target="_blank" rel="noopener">📷 ${esc(im[2])}${im[3] ? " · " + esc(im[3]) : ""}</a>` : ""}</div>`;
+    ${im && im[4] === "ex" ? '<span class="ex ex-card">Beispielbild</span>' : ""}${im && im[2] ? `<a class="sw-credit" href="${esc(im[1] || im[0])}" target="_blank" rel="noopener">📷 ${esc(im[2])}${im[3] ? " · " + esc(im[3]) : ""}</a>` : ""}</div>`;
 }
 function renderIntro(q, count) {
   const s = SPOTS[q], im = s.img;

@@ -246,7 +246,13 @@
 "kind": "food",
 "q": "q_kad",
 "n": "Ryo Matcha",
-"img": null,
+"img": [
+"https://thumb.wikimedia.org/wikipedia/commons/thumb/1/1f/Matcha_tea_latte_with_rosetta_latte_art.jpg/960px-Matcha_tea_latte_with_rosetta_latte_art.jpg",
+"https://commons.wikimedia.org/wiki/File:Matcha_tea_latte_with_rosetta_latte_art.jpg",
+"Irvan Ary Maulana",
+"CC BY-SA 4.0",
+"ex"
+],
 "d": "Matcha-Drinks mit Show",
 "note": "Filiale Kadıköy/Moda",
 "dist": "ca. 10–15 Min. zu Fuss",
@@ -269,7 +275,13 @@
 "kind": "food",
 "q": "q_kad",
 "n": "Wizard's Coffee House",
-"img": null,
+"img": [
+"https://thumb.wikimedia.org/wikipedia/commons/thumb/7/71/Bookshelf_of_cafe_in_Shimokitazawa_-_2008-04-20_15.36.27_%28by_Guwashi999%29.jpg/960px-Bookshelf_of_cafe_in_Shimokitazawa_-_2008-04-20_15.36.27_%28by_Guwashi999%29.jpg",
+"https://commons.wikimedia.org/wiki/File:Bookshelf_of_cafe_in_Shimokitazawa_-_2008-04-20_15.36.27_(by_Guwashi999).jpg",
+"Guwashi999",
+"CC BY 2.0",
+"ex"
+],
 "d": "Harry-Potter-Themencafé",
 "note": "Ohne Reservation · Kontakt nur per Instagram-DM",
 "dist": "ca. 10 Min. zu Fuss",
@@ -293,7 +305,13 @@
 "kind": "food",
 "q": "q_kad",
 "n": "BaoBao",
-"img": null,
+"img": [
+"https://thumb.wikimedia.org/wikipedia/commons/thumb/c/c5/Nangua_Baozi_%28chinese_dumplings%29.jpg/960px-Nangua_Baozi_%28chinese_dumplings%29.jpg",
+"https://commons.wikimedia.org/wiki/File:Nangua_Baozi_(chinese_dumplings).jpg",
+"J. Samuel Burner",
+"CC BY 2.0",
+"ex"
+],
 "d": "Bao, Dim Sum, Dumplings",
 "note": "Täglich 11–21 Uhr (Instagram)",
 "dist": "ca. 5–10 Min. zu Fuss",
@@ -317,7 +335,13 @@
 "kind": "food",
 "q": "q_kad",
 "n": "Paitan Ramen & Gyoza",
-"img": null,
+"img": [
+"https://thumb.wikimedia.org/wikipedia/commons/thumb/6/69/Ramen_Bowl_2.jpg/960px-Ramen_Bowl_2.jpg",
+"https://commons.wikimedia.org/wiki/File:Ramen_Bowl_2.jpg",
+"Shisma",
+"CC BY 4.0",
+"ex"
+],
 "d": "Ramen selbst zusammenstellen, Gyoza",
 "note": "Mo–Do 12:30–21, Fr –21:30, Sa 13–21:30 (Instagram)",
 "dist": "ca. 5–10 Min. zu Fuss",
@@ -466,7 +490,13 @@
 "kind": "act",
 "q": "q_sul",
 "n": "Bunte Häuser Sultanahmet",
-"img": null,
+"img": [
+"https://thumb.wikimedia.org/wikipedia/commons/thumb/5/5c/Sogukcesme_Sokagi_Istanbul_2007_003.jpg/960px-Sogukcesme_Sokagi_Istanbul_2007_003.jpg",
+"https://commons.wikimedia.org/wiki/File:Sogukcesme_Sokagi_Istanbul_2007_003.jpg",
+"Gryffindor",
+"Public domain",
+"ex"
+],
 "d": "Cafés mit farbigen Stühlen",
 "note": "",
 "dist": "ca. 40 Min. (Fähre + Tram)",
@@ -486,7 +516,13 @@
 "kind": "food",
 "q": "q_sul",
 "n": "Seven Hills Rooftop",
-"img": null,
+"img": [
+"https://thumb.wikimedia.org/wikipedia/commons/thumb/0/0d/Turkish_breakfast_photo1.jpg/960px-Turkish_breakfast_photo1.jpg",
+"https://commons.wikimedia.org/wiki/File:Turkish_breakfast_photo1.jpg",
+"Sami Mlouhi",
+"CC BY-SA 4.0",
+"ex"
+],
 "d": "Frühstück mit Blick auf Hagia Sophia & Blaue Moschee",
 "note": "",
 "dist": "ca. 40 Min. (Fähre + Tram)",
@@ -509,7 +545,13 @@
 "kind": "food",
 "q": "q_sul",
 "n": "Roof Mezze 360",
-"img": null,
+"img": [
+"https://thumb.wikimedia.org/wikipedia/commons/thumb/0/04/Turkish_meze_plate.jpg/960px-Turkish_meze_plate.jpg",
+"https://commons.wikimedia.org/wiki/File:Turkish_meze_plate.jpg",
+"Paasikivi",
+"CC BY-SA 4.0",
+"ex"
+],
 "d": "Rooftop-Dinner, Live-Musik, Cocktails",
 "note": "Reservation via Instagram/WhatsApp",
 "dist": "ca. 40 Min. (Fähre + Tram)",
@@ -583,7 +625,13 @@
 "kind": "act",
 "q": "q_emi",
 "n": "Diri Han",
-"img": null,
+"img": [
+"https://upload.wikimedia.org/wikipedia/commons/f/f8/Business_making%2C_Istanbul_Grand_Bazaar_%28456333936%29.jpg",
+"https://commons.wikimedia.org/wiki/File:Business_making,_Istanbul_Grand_Bazaar_(456333936).jpg",
+"Fulvio Spada",
+"CC BY-SA 2.0",
+"ex"
+],
 "d": "Versteckter Han mit Wendeltreppe und Pflanzen",
 "note": "Sirkeci, Hocahanı Sokak",
 "dist": "ca. 30 Min. (Fähre)",
@@ -628,7 +676,13 @@
 "kind": "food",
 "q": "q_emi",
 "n": "Alpek Terrace",
-"img": null,
+"img": [
+"https://upload.wikimedia.org/wikipedia/commons/3/34/-istanbul_-mosque_-sunset_-turkey_-sky_-cloud_-nature_-Bosphorus_-Emin%C3%B6n%C3%BC_-fatih_-newmosque_-Karak%C3%B6y_%2814272818011%29.jpg",
+"https://commons.wikimedia.org/wiki/File:-istanbul_-mosque_-sunset_-turkey_-sky_-cloud_-nature_-Bosphorus_-Emin%C3%B6n%C3%BC_-fatih_-newmosque_-Karak%C3%B6y_(14272818011).jpg",
+"Abdullah Muashi",
+"CC BY 2.0",
+"ex"
+],
 "d": "Sonnenuntergang mit Blick auf die Neue Moschee",
 "note": "",
 "dist": "ca. 30 Min. (Fähre)",
@@ -677,7 +731,13 @@
 "kind": "act",
 "q": "q_bal",
 "n": "Bunte Treppe",
-"img": null,
+"img": [
+"https://thumb.wikimedia.org/wikipedia/commons/thumb/8/84/Rainbow_stairs_in_Universit%C3%A9_Rennes_3.jpg/960px-Rainbow_stairs_in_Universit%C3%A9_Rennes_3.jpg",
+"https://commons.wikimedia.org/wiki/File:Rainbow_stairs_in_Universit%C3%A9_Rennes_3.jpg",
+"John Samuel",
+"CC BY-SA 4.0",
+"ex"
+],
 "d": "Fotospot",
 "note": "Auf Google: „İncir Ağacı Kahvesi“",
 "dist": "ca. 50 Min. (Fähre + Bus/Taxi)",
@@ -697,7 +757,13 @@
 "kind": "act",
 "q": "q_bal",
 "n": "Schirm-Hof Balat",
-"img": null,
+"img": [
+"https://thumb.wikimedia.org/wikipedia/commons/thumb/7/76/Colorful_umbrellas_at_night_Taksim_Istanbul_2024.jpg/960px-Colorful_umbrellas_at_night_Taksim_Istanbul_2024.jpg",
+"https://commons.wikimedia.org/wiki/File:Colorful_umbrellas_at_night_Taksim_Istanbul_2024.jpg",
+"Furkan Akkurt",
+"CC BY-SA 4.0",
+"ex"
+],
 "d": "Hof mit bunten Schirmen",
 "note": "",
 "dist": "ca. 50 Min. (Fähre + Bus/Taxi)",
@@ -717,7 +783,13 @@
 "kind": "food",
 "q": "q_bal",
 "n": "Popstel",
-"img": null,
+"img": [
+"https://thumb.wikimedia.org/wikipedia/commons/thumb/f/ff/Phanar_Greek_Orthodox_college_-_2012_panoramio.jpg/960px-Phanar_Greek_Orthodox_college_-_2012_panoramio.jpg",
+"https://commons.wikimedia.org/wiki/File:Phanar_Greek_Orthodox_college_-_2012_panoramio.jpg",
+"Mister No",
+"CC BY 3.0",
+"ex"
+],
 "d": "Dachterrasse mit Blick auf die Rote Schule",
 "note": "",
 "dist": "ca. 50 Min. (Fähre + Bus/Taxi)",
@@ -740,7 +812,12 @@
 "kind": "act",
 "q": "q_bal",
 "n": "Feshane / ArtIstanbul",
-"img": null,
+"img": [
+"https://thumb.wikimedia.org/wikipedia/commons/thumb/8/8f/Istanbul_Feshane_Art%C4%B0stanbul_exterior_in_october_2023_5156.jpg/960px-Istanbul_Feshane_Art%C4%B0stanbul_exterior_in_october_2023_5156.jpg",
+"https://commons.wikimedia.org/wiki/File:Istanbul_Feshane_Art%C4%B0stanbul_exterior_in_october_2023_5156.jpg",
+"Dosseman",
+"CC BY-SA 4.0"
+],
 "d": "Grosse Kunstausstellung in alter Fabrikhalle",
 "note": "Ca. 2 km hinter Balat · mit Pierre Loti kombinieren",
 "dist": "ca. 60 Min.",
@@ -785,7 +862,13 @@
 "kind": "act",
 "q": "q_kar",
 "n": "Regenschirm-Gasse Karaköy",
-"img": null,
+"img": [
+"https://thumb.wikimedia.org/wikipedia/commons/thumb/7/76/Colorful_umbrellas_at_night_Taksim_Istanbul_2024.jpg/960px-Colorful_umbrellas_at_night_Taksim_Istanbul_2024.jpg",
+"https://commons.wikimedia.org/wiki/File:Colorful_umbrellas_at_night_Taksim_Istanbul_2024.jpg",
+"Furkan Akkurt",
+"CC BY-SA 4.0",
+"ex"
+],
 "d": "Bunte Schirme, Street Art, Cafés",
 "note": "",
 "dist": "ca. 35 Min. (Fähre)",
@@ -858,7 +941,13 @@
 "kind": "act",
 "q": "q_gal",
 "n": "Petra Vintage",
-"img": null,
+"img": [
+"https://thumb.wikimedia.org/wikipedia/commons/thumb/7/7d/Vintage_Clothing_Store%2C_Phnom_Penh.png/960px-Vintage_Clothing_Store%2C_Phnom_Penh.png",
+"https://commons.wikimedia.org/wiki/File:Vintage_Clothing_Store,_Phnom_Penh.png",
+"Anilakeo",
+"CC BY-SA 4.0",
+"ex"
+],
 "d": "Mehrstöckiger Vintage-Laden",
 "note": "Mo–Sa 10:30–20, So 12–20",
 "dist": "ca. 35 Min. (Fähre)",
@@ -928,7 +1017,13 @@
 "kind": "food",
 "q": "q_ort",
 "n": "Kaytan Lounge",
-"img": null,
+"img": [
+"https://thumb.wikimedia.org/wikipedia/commons/thumb/2/2b/The_Bosphorus_Bridge_%282914977253%29.jpg/960px-The_Bosphorus_Bridge_%282914977253%29.jpg",
+"https://commons.wikimedia.org/wiki/File:The_Bosphorus_Bridge_(2914977253).jpg",
+"Leandro Neumann Ciuffo",
+"CC BY 2.0",
+"ex"
+],
 "d": "Frühstück oder Abend mit Brückenblick",
 "note": "Täglich 08–02 Uhr",
 "dist": "ca. 40 Min. (Fähre + Bus)",
@@ -952,7 +1047,13 @@
 "kind": "food",
 "q": "q_ort",
 "n": "Visorante",
-"img": null,
+"img": [
+"https://thumb.wikimedia.org/wikipedia/commons/thumb/2/2f/Ortak%C3%B6y_Mosque_and_Bosphorus_Bridge%2C_March_2024_01.jpg/960px-Ortak%C3%B6y_Mosque_and_Bosphorus_Bridge%2C_March_2024_01.jpg",
+"https://commons.wikimedia.org/wiki/File:Ortak%C3%B6y_Mosque_and_Bosphorus_Bridge,_March_2024_01.jpg",
+"Calistemon",
+"CC BY-SA 4.0",
+"ex"
+],
 "d": "Italienisch mit Blick auf die Bosporus-Brücke",
 "note": "Eher teuer",
 "dist": "ca. 40 Min. (Fähre + Bus)",
