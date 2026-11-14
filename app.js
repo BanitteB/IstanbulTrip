@@ -64,7 +64,7 @@ let SPOTS = {}, PLACES = {}, SPOTS_FROM_DB = false;
 async function loadSpots() {
   let rows = null;
   if (db) { const { data, error } = await db.from("places").select("id,data,sort").eq("trip", TRIP).order("sort"); if (!error && data.length && data.some(r => r.data.kind === "quarter")) { rows = data; SPOTS_FROM_DB = true } }
-  if (!rows) { try { rows = await fetch("defaults.json?v=23").then(r => r.json()) } catch (e) { rows = [] } SPOTS_FROM_DB = false }
+  if (!rows) { try { rows = await fetch("defaults.json?v=24").then(r => r.json()) } catch (e) { rows = [] } SPOTS_FROM_DB = false }
   SPOTS = {}; rows.forEach(r => SPOTS[r.id] = { ...r.data, sort: r.sort || 0 });
   PLACES = { ...BASE }; Object.entries(SPOTS).forEach(([id, s]) => PLACES[id] = s);
 }

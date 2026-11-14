@@ -1012,6 +1012,31 @@
 "sort": 390
 },
 {
+"id": "bosporus",
+"sort": 391,
+"data": {
+"kind": "act",
+"q": "q_ort",
+"n": "Bosporus-Fahrt",
+"img": [
+"https://thumb.wikimedia.org/wikipedia/commons/thumb/e/ef/Emin_Kul.jpg/960px-Emin_Kul.jpg",
+"https://commons.wikimedia.org/wiki/File:Emin_Kul.jpg",
+"Ail Subway",
+"CC BY 3.0"
+],
+"d": "Mit dem Schiff zwischen Europa und Asien, Paläste und Brücken vom Wasser aus",
+"note": "Öffentliche Tour (Şehir Hatları) ab Eminönü oder Sunset-Cruise ab Beşiktaş/Ortaköy · Sonnenuntergang ca. 16:40",
+"dist": "ca. 30–40 Min. (Fähre)",
+"vibe": "Touristisch",
+"ll": [
+41.042,
+29.006
+],
+"tip": "",
+"go": ""
+}
+},
+{
 "id": "kaytan",
 "data": {
 "kind": "food",
