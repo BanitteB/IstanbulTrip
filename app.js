@@ -106,9 +106,13 @@ function focusPlace(id) {
 
 // ---------- Countdown ----------
 (() => {
-  const start = new Date("2026-11-19T00:00:00+03:00"), end = new Date("2026-11-23T00:00:00+03:00"), now = new Date();
-  if (now < start) { const d = Math.ceil((start - now) / 864e5); $("countdown").textContent = `Noch ${d} ${d === 1 ? "Tag" : "Tage"} ✈️` }
-  else $("countdown").textContent = now < end ? "Ihr seid da! 🎉" : "Schön war's 💙";
+  const start = new Date("2026-11-19T10:50:00+01:00"), end = new Date("2026-11-23T00:00:00+03:00");
+  const tick = () => { const now = new Date(), el = $("countdown");
+    if (now >= end) { el.textContent = "Schön war's 💙"; return }
+    if (now >= start) { el.textContent = "Ihr seid unterwegs! 🎉"; return }
+    const m = Math.floor((start - now) / 60000), d = Math.floor(m / 1440), h = Math.floor(m % 1440 / 60), mi = m % 60;
+    el.textContent = `✈️ Noch ${d} ${d === 1 ? "Tag" : "Tage"}, ${h} Std., ${mi} Min. bis zum Abflug`; };
+  tick(); setInterval(tick, 30000);
 })();
 
 // ---------- Swipes: wer muss was swipen ----------
