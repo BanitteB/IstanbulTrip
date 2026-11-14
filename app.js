@@ -183,6 +183,23 @@ function computePlan() {
   planResult = { days, extra, titles, food };
   if (JSON.stringify(planResult) !== before) renderDay();
 }
+// ---------- Wegzeiten (Schätzung) ----------
+const BOSPORUS = [[40.97, 28.995], [41.02, 29.005], [41.04, 29.015], [41.05, 29.035], [41.12, 29.065]];
+function isAsia([lat, lng]) {
+  for (let i = 0; i < BOSPORUS.length - 1; i++) { const [a1, o1] = BOSPORUS[i], [a2, o2] = BOSPORUS[i + 1];
+    if (lat <= a2 || i === BOSPORUS.length - 2) return lng > o1 + (Math.max(a1, Math.min(lat, a2)) - a1) / (a2 - a1) * (o2 - o1) }
+}
+function km(a, b) { const R = 6371, r = x => x * Math.PI / 180, dLa = r(b[0] - a[0]), dLo = r(b[1] - a[1]);
+  return 2 * R * Math.asin(Math.sqrt(Math.sin(dLa / 2) ** 2 + Math.cos(r(a[0])) * Math.cos(r(b[0])) * Math.sin(dLo / 2) ** 2)) }
+function leg(a, b) {
+  const d = km(a, b), cross = isAsia(a) !== isAsia(b), r5 = m => m < 10 ? Math.max(2, Math.round(m)) : Math.round(m / 5) * 5;
+  if (d < 0.08) return null;
+  if (!cross && d <= 1.6) return { icon: "🚶", text: `ca. ${r5(d * 1.25 / 4.5 * 60)} Min. zu Fuss (${d < 1 ? Math.round(d * 1.25 * 100) * 10 + " m" : (d * 1.25).toFixed(1) + " km"})`, mode: "walking" };
+  if (cross) return { icon: "⛴️", text: `ca. ${r5(18 + d * 3.5)} Min. mit Fähre/Marmaray`, mode: "transit" };
+  return { icon: "🚇", text: `ca. ${r5(8 + d * 4)} Min. mit Tram/Bus/Taxi`, mode: "transit" };
+}
+const legLink = (a, b, mode) => `https://www.google.com/maps/dir/?api=1&origin=${a[0]},${a[1]}&destination=${b[0]},${b[1]}&travelmode=${mode}`;
+
 // ---------- Plan anzeigen ----------
 let done = store.get("ist-done", {});
 let curDay = (() => { const t = new Date().toLocaleDateString("sv-SE", { timeZone: "Europe/Istanbul" }); const i = DAYS.findIndex(d => d.date === t); return i < 0 ? 1 : i })();
@@ -199,12 +216,18 @@ function renderDay() {
   const locked = !planResult ? `<div class="wtip" style="margin:10px 0">🔒 Das Programm entsteht, sobald ${TRAVELERS.join(", ")} geswipt haben. <a href="#swipe-card">Zum Swipen ↓</a></div>` : "";
   const extra = (planResult && curDay === DAYS.length - 1 && planResult.extra.length ? `<div class="wtip" style="margin-top:10px">✨ Wenn Zeit bleibt: ${planResult.extra.map(r => esc(SPOTS[r.id].n)).join(", ")}</div>` : "") +
     (planResult && planResult.food[d.key]?.length ? `<div class="wtip" style="margin-top:10px">🍽️ Essen in der Nähe: ${planResult.food[d.key].map(id => `<a href="#food-card" data-food="${esc(id)}">${esc(SPOTS[id].n)}</a>`).join(" · ")}</div>` : "");
+  let prev = null;
   $("daypanel").innerHTML = `<p class="daytitle">${esc(title)}</p><p class="daynote">${d.note}</p>` +
-    stops.map(s => { const k = d.key + "-" + s.p + "-" + s.t, p = PLACES[s.p]; if (!p) return ""; return `<div class="stop ${done[k] ? "done" : ""}${s.quarter ? " qstop" : ""}">
+    stops.map(s => { const k = d.key + "-" + s.p + "-" + s.t, p = PLACES[s.p]; if (!p) return "";
+      let between = "";
+      if (planResult && prev && p.ll && prev.ll && s.p !== "saw" && prev.id !== "saw" && prev.id !== s.p) { const L2 = leg(prev.ll, p.ll);
+        if (L2) between = `<div class="leg"><span>${L2.icon} ${L2.text}</span><a href="${legLink(prev.ll, p.ll, L2.mode)}" target="_blank" rel="noopener">genau ↗</a></div>` }
+      if (p.ll) prev = { ll: p.ll, id: s.p };
+      return between + `<div class="stop ${done[k] ? "done" : ""}${s.quarter ? " qstop" : ""}">
       <input type="checkbox" data-k="${esc(k)}" ${done[k] ? "checked" : ""} aria-label="erledigt">
       <div class="time">${esc(s.t)}</div>
       <div><div class="name" data-p="${esc(s.p)}">${esc(p.n)}</div><div class="info">${esc(s.info)}</div>
-      ${s.go ? `<div class="go">🚋 ${esc(s.go)}</div>` : ""}${p.ll && s.p !== "saw" ? `<div class="go"><a href="${route(p.ll)}" target="_blank" rel="noopener">🚇 Route mit ÖV ↗</a></div>` : ""}</div></div>` }).join("") + locked + extra;
+      ${s.go ? `<div class="go">🚋 ${esc(s.go)}</div>` : ""}${p.ll && s.p !== "saw" && !planResult ? `<div class="go"><a href="${route(p.ll)}" target="_blank" rel="noopener">🚇 Route mit ÖV ↗</a></div>` : ""}</div></div>` }).join("") + locked + extra;
   showDayOnMap(stops);
 }
 $("tabs").onclick = e => { const b = e.target.closest(".tab"); if (!b) return; curDay = +b.dataset.i; renderTabs(); renderDay() };
@@ -436,9 +459,8 @@ const PHRASES = [
 function speak(t) { try { const u = new SpeechSynthesisUtterance(t); u.lang = "tr-TR"; u.rate = .85; speechSynthesis.cancel(); speechSynthesis.speak(u) } catch (e) {} }
 function renderPhrases() {
   const canSpeak = "speechSynthesis" in window;
-  $("phrases").innerHTML = PHRASES.map(([g, list]) => `<div class="route"><b>${g}</b>${list.map(([de, tr, pr]) => `<div class="phr">
-      <div><div class="tr">${esc(tr)}</div><div class="muted">${esc(de)} · <i>${esc(pr)}</i></div></div>
-      ${canSpeak ? `<button class="say" data-say="${esc(tr.replace(/…/g, ""))}" aria-label="Anhören">🔊</button>` : ""}</div>`).join("")}</div>`).join("");
+  $("phrases").innerHTML = PHRASES.map(([g, list], i) => `<details class="phr-g" ${i < 2 ? "open" : ""}><summary>${g} <span class="muted">(${list.length})</span></summary>
+    <div class="phr-list">${list.map(([de, tr, pr]) => `<div class="phr2"><span class="tr">${esc(tr)}</span><span class="meta">${esc(de)} · <i>${esc(pr)}</i></span>${canSpeak ? `<button class="say2" data-say="${esc(tr.replace(/…/g, ""))}" aria-label="Anhören">🔊</button>` : ""}</div>`).join("")}</div></details>`).join("");
   $("phrases").querySelectorAll("[data-say]").forEach(b => b.onclick = () => speak(b.dataset.say));
 }
 
