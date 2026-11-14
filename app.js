@@ -40,8 +40,8 @@ const DAYS = [
     start: [{ t: "15:45", p: "saw", info: "Zürich-Flug landet, mit der M4 bis Kadıköy", go: "Oder Hotel-Flughafentransfer" },
             { t: "ca. 17:00", p: "hotel", info: "Einchecken" },
             { t: "17:45", p: "saw", info: "Bodrum-Flug landet, ca. 19 Uhr im Hotel" }], end: [] },
-  { key: "fr", tab: "Fr 20.", date: "2026-11-20", title: "Freitag", note: "Moscheen freitags erst nach dem Mittagsgebet besuchen.", start: [], end: [] },
-  { key: "sa", tab: "Sa 21.", date: "2026-11-21", title: "Samstag", note: "Sonnenuntergang ca. 16:40.", start: [], end: [] },
+  { key: "fr", tab: "Fr 20.", date: "2026-11-20", title: "Freitag", note: "", start: [], end: [] },
+  { key: "sa", tab: "Sa 21.", date: "2026-11-21", title: "Samstag", note: "", start: [], end: [] },
   { key: "so", tab: "So 22.", date: "2026-11-22", title: "Abreise", note: "✈️ SAW → BJV 13:55 (PC2248) · SAW → Basel 15:00 (AJet VF105). Check-out bis 12 Uhr.",
     start: [], end: [{ t: "11:30", p: "hotel", info: "Check-out. Bodrum-Flug: spätestens jetzt los" },
                      { t: "12:00", p: "saw", info: "Basel-Flug: M4 direkt zum SAW, knapp 1 Std." }] }
@@ -218,7 +218,7 @@ function renderDay() {
   const extra = (planResult && curDay === DAYS.length - 1 && planResult.extra.length ? `<div class="wtip" style="margin-top:10px">✨ Wenn Zeit bleibt: ${planResult.extra.map(r => esc(SPOTS[r.id].n)).join(", ")}</div>` : "") +
     (planResult && planResult.food[d.key]?.length ? `<div class="wtip" style="margin-top:10px">🍽️ Essen in der Nähe: ${planResult.food[d.key].map(id => `<a href="#food-card" data-food="${esc(id)}">${esc(SPOTS[id].n)}</a>`).join(" · ")}</div>` : "");
   let prev = null;
-  $("daypanel").innerHTML = `<p class="daytitle">${esc(title)}</p><p class="daynote">${d.note}</p>` +
+  $("daypanel").innerHTML = `<p class="daytitle">${esc(title)}</p>${d.note ? `<p class="daynote">${d.note}</p>` : ""}` +
     stops.map(s => { const k = d.key + "-" + s.p + "-" + s.t, p = PLACES[s.p]; if (!p) return "";
       let between = "";
       if (planResult && prev && p.ll && prev.ll && s.p !== "saw" && prev.id !== "saw" && prev.id !== s.p) { const L2 = leg(prev.ll, p.ll);
