@@ -176,7 +176,7 @@ function computePlan() {
   E.acts.filter(r => r.chosen && SPOTS[SPOTS[r.id].q]?.day === "kad").forEach((r, i) => days[i % 2 ? "do" : "so"].push({ ...r, pos: i % 2 ? 870 : 0, t: i % 2 ? "Abend" : "Morgen" }));
   // Restaurant-Ideen in der Nähe (ohne Swipen)
   const kadQ = QIDS().filter(q => SPOTS[q].day === "kad");
-  const food = {}; DAYS.forEach(d => { const qs = d.key === "fr" || d.key === "sa" ? [...dayQ[d.key], ...kadQ] : kadQ; food[d.key] = kindIds("food").filter(id => qs.includes(SPOTS[id].q)) });
+  const food = {}; DAYS.forEach(d => { const qs = d.key === "fr" || d.key === "sa" ? [...dayQ[d.key], ...kadQ] : kadQ; food[d.key] = kindIds("food").filter(id => qs.includes(SPOTS[id].q)).sort((x, y) => qs.indexOf(SPOTS[x].q) - qs.indexOf(SPOTS[y].q)) });
   DAYS.forEach(d => days[d.key].sort((a, b) => a.pos - b.pos));
   const titles = { fr: dayQ.fr.map(q => SPOTS[q].n).join(" · ") || "Freier Tag", sa: dayQ.sa.map(q => SPOTS[q].n).join(" · ") || "Freier Tag" };
   const before = JSON.stringify(planResult);
