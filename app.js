@@ -207,7 +207,8 @@ function dayStops(d) {
   const mid = planResult ? (planResult.days[d.key] || []).map(r => r.quarter
     ? { t: r.t, p: r.id, info: "🚶 Viertel erkunden: " + (SPOTS[r.id].d || ""), go: ROUTES[r.id]?.[0], quarter: true }
     : { t: r.t || "", p: r.id, info: (r.meal ? MEAL[r.meal] + " · " : "") + (SPOTS[r.id].d || "") + (SPOTS[r.id].note ? " · " + SPOTS[r.id].note : "") + (r.star ? " ⭐" : "") }) : [];
-  return [...d.start, ...mid, ...d.end];
+  const home = planResult && (d.key === "fr" || d.key === "sa") && mid.length ? [{ t: "Start", p: "hotel", info: "Los geht's ab Hotel" }] : [];
+  return [...d.start, ...home, ...mid, ...d.end];
 }
 function renderTabs() { $("tabs").innerHTML = DAYS.map((d, i) => `<button class="tab ${i === curDay ? "on" : ""}" data-i="${i}">${d.tab}</button>`).join("") }
 function renderDay() {
