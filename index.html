@@ -191,6 +191,10 @@ html,body{overflow-x:hidden;max-width:100%}
 .nf-112{display:inline-block;background:#c62828;color:#fff;font-weight:800;font-size:1.6rem;padding:8px 18px;border-radius:12px;text-decoration:none}
 .taxi-full{position:fixed;inset:0;z-index:6000;background:#fff8e6;display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;padding:24px}
 .taxi-full .nf-tr{font-size:1.6rem}.taxi-full .nf-addr{font-size:2.4rem}
+.fl-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:12px}
+.fl-p{background:var(--sand);border-radius:14px;padding:12px 14px}.fl-p h3{margin:0 0 6px;font-size:1rem}
+.fl{display:grid;grid-template-columns:76px 1fr;gap:0 8px;padding:6px 0;border-top:1px dashed var(--line)}
+.fl-d{font-size:.8rem;font-weight:600;color:var(--terra);grid-row:span 2}.fl-r{font-size:.95rem}.fl-n{font-size:.78rem;color:var(--muted)}
 footer{text-align:center;color:var(--muted);font-size:.78rem;padding:10px 0 30px}
 </style>
 </head>
@@ -365,6 +369,21 @@ footer{text-align:center;color:var(--muted);font-size:.78rem;padding:10px 0 30px
       </div>
     </div>
   </section>
+
+  <section class="card span2" id="fluege">
+    <h2>✈️ Flugpläne</h2>
+    <div class="fl-grid">
+      <div class="fl-p"><h3>Valä & Cha</h3>
+        <div class="fl"><span class="fl-d">Do 19.11.</span><div class="fl-r"><b>ZRH 10:50</b> → <b>SAW 15:45</b></div><span class="fl-n">Pegasus PC948 · 2 Std. 55 Min.</span></div>
+        <div class="fl"><span class="fl-d">So 22.11.</span><div class="fl-r"><b>SAW 15:00</b> → <b>BSL 16:15</b></div><span class="fl-n">AJet VF105 · nach Basel · 3 Std. 15 Min.</span></div>
+      </div>
+      <div class="fl-p"><h3>Bettä</h3>
+        <div class="fl"><span class="fl-d">Do 19.11.</span><div class="fl-r"><b>BJV 16:25</b> → <b>SAW 17:45</b></div><span class="fl-n">Pegasus PC2249 · 1 Std. 20 Min.</span></div>
+        <div class="fl"><span class="fl-d">So 22.11.</span><div class="fl-r"><b>SAW 13:55</b> → <b>BJV 15:10</b></div><span class="fl-n">Pegasus PC2248 · 1 Std. 15 Min.</span></div>
+      </div>
+    </div>
+    <p class="muted" style="margin:10px 0 0">Alle Flüge ab/an Sabiha Gökçen (SAW): mit der M4 direkt ab Kadıköy, knapp 1 Std.</p>
+  </section>
 </main>
 <div id="admin" class="adm-overlay" style="display:none"><section class="card adm-box">
   <div style="display:flex;justify-content:space-between;align-items:center"><h2 style="margin:0">🔧 Admin</h2><button class="btn ghost small" id="adm-close">✕ Schliessen</button></div>
@@ -420,6 +439,6 @@ footer{text-align:center;color:var(--muted);font-size:.78rem;padding:10px 0 30px
 
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="app.js?v=34"></script>
+<script src="app.js?v=35"></script>
 </body>
 </html>
