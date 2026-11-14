@@ -16,6 +16,7 @@ const $ = id => document.getElementById(id);
 const esc = t => String(t ?? "").replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
 const gmaps = n => "https://www.google.com/maps/search/?api=1&query=" + encodeURIComponent(n.replace(/\s*\(.*?\)/g, "") + " Istanbul");
 const route = ll => `https://www.google.com/maps/dir/?api=1&destination=${ll[0]},${ll[1]}&travelmode=transit`;
+const igUrl = v => { v = (v || "").trim(); if (!v) return ""; if (/^https?:\/\//i.test(v)) return v; return "https://www.instagram.com/" + v.replace(/^@/, "").replace(/^instagram\.com\//i, "").replace(/\/$/, "") + "/" };
 const VIBE = { Touristisch: "📸 Touristisch", Lokal: "🏡 Lokal", Gemischt: "🔀 Gemischt" };
 
 // ---------- Tage, Mahlzeiten ----------
@@ -315,7 +316,7 @@ function cardHtml(id, back) {
     ${!quarter && s.q ? `<div class="sw-q">📍 ${esc(qName(id))}</div>` : ""}
     <h3>${esc(s.n)}</h3><p>${esc(s.d)}</p>${chips}
     ${quarter && s.tip ? `<p class="sw-tip">💡 ${esc(s.tip)}</p>` : ""}${!quarter && s.note ? `<p class="sw-tip">ℹ️ ${esc(s.note)}</p>` : ""}
-    ${im ? `<a class="sw-gmaps" href="${gmaps(s.n)}" target="_blank" rel="noopener">📸 Mehr Fotos</a>` : ""}
+    ${im ? `<a class="sw-gmaps" href="${gmaps(s.n)}" target="_blank" rel="noopener">📸 Mehr Fotos</a>` : ""}${s.ig ? `<a class="sw-gmaps" href="${esc(igUrl(s.ig))}" target="_blank" rel="noopener">📷 Instagram</a>` : ""}
     ${im && im[4] === "ex" ? '<span class="ex ex-card">Beispielbild</span>' : ""}${im && im[2] ? `<a class="sw-credit" href="${esc(im[1] || im[0])}" target="_blank" rel="noopener">📷 ${esc(im[2])}${im[3] ? " · " + esc(im[3]) : ""}</a>` : ""}</div>`;
 }
 function renderIntro(q, count) {
@@ -379,7 +380,7 @@ function renderFood() {
     return `<h3 class="food-q">📍 ${esc(SPOTS[q].n)}</h3><div class="food-grid">${f.map(id => { const s = SPOTS[id], im = s.img;
       return `<div class="food-item" id="food-${esc(id)}"><div class="food-img" style="${im ? `background-image:url('${esc(im[0])}')` : "background:#c8553d"}">${im && im[4] === "ex" ? '<span class="ex">Beispielbild</span>' : ""}</div>
         <div class="food-b"><b>${esc(s.n)}</b><span>${esc(s.d)}</span><span class="tile-k">${(s.meals || []).map(m => MEAL[m]).join(" · ")}${s.vibe ? " · " + (VIBE[s.vibe] || "") : ""}</span>${s.note ? `<span class="muted">ℹ️ ${esc(s.note)}</span>` : ""}
-        <span class="food-l"><a href="${gmaps(s.n)}" target="_blank" rel="noopener">📸 Google Maps</a>${s.ll ? ` · <a href="${route(s.ll)}" target="_blank" rel="noopener">🚇 Route</a>` : ""}</span></div></div>` }).join("")}</div>` }).join("");
+        <span class="food-l">${s.ig ? `<a href="${esc(igUrl(s.ig))}" target="_blank" rel="noopener">📷 Instagram</a> · ` : ""}<a href="${gmaps(s.n)}" target="_blank" rel="noopener">📸 Google Maps</a>${s.ll ? ` · <a href="${route(s.ll)}" target="_blank" rel="noopener">🚇 Route</a>` : ""}</span></div></div>` }).join("")}</div>` }).join("");
 }
 // ---------- Lieblingsorte ----------
 let favs = store.get("ist-favs", []), filter = "all";
@@ -587,7 +588,7 @@ function openEditor(id, kind) {
   $("ed-q").innerHTML = QIDS().map(q => `<option value="${esc(q)}">${esc(SPOTS[q].n)}</option>`).join(""); if (s.q) $("ed-q").value = s.q;
   $("ed-day").value = s.day || "fr"; $("ed-vibe").value = s.vibe || "Gemischt"; $("ed-dist").value = s.dist || "";
   document.querySelectorAll("[data-meal]").forEach(c => c.checked = (s.meals || []).includes(c.dataset.meal));
-  $("ed-tip").value = s.kind === "quarter" ? (s.tip || "") : (s.note || ""); $("ed-go").value = s.go || "";
+  $("ed-tip").value = s.kind === "quarter" ? (s.tip || "") : (s.note || ""); $("ed-go").value = s.go || ""; $("ed-ig").value = s.ig || "";
   $("ed-lat").value = s.ll ? s.ll[0] : ""; $("ed-lng").value = s.ll ? s.ll[1] : "";
   setEdImg(s.img); $("ed-geo-res").innerHTML = ""; $("ed-img-res").innerHTML = ""; $("ed-msg").textContent = "";
   edKind(); $("ed").scrollIntoView({ behavior: "smooth", block: "start" });
@@ -628,7 +629,7 @@ async function saveSpot() {
   const meals = [...document.querySelectorAll("[data-meal]")].filter(c => c.checked).map(c => c.dataset.meal);
   if (kind === "food" && !meals.length) return $("ed-msg").textContent = "❌ Mindestens eine Mahlzeit wählen";
   const url = $("ed-imgurl").value.trim(); if (url) setEdImg([url, url, "", ""]);
-  const d = { kind, n, d: $("ed-d").value.trim(), vibe: $("ed-vibe").value, dist: $("ed-dist").value.trim(), ll: isFinite(lat) && isFinite(lng) ? [lat, lng] : null, img: edImg };
+  const d = { kind, n, d: $("ed-d").value.trim(), ig: $("ed-ig").value.trim(), vibe: $("ed-vibe").value, dist: $("ed-dist").value.trim(), ll: isFinite(lat) && isFinite(lng) ? [lat, lng] : null, img: edImg };
   if (kind === "quarter") Object.assign(d, { day: $("ed-day").value, tip: $("ed-tip").value.trim(), go: $("ed-go").value.trim() });
   else Object.assign(d, { q: $("ed-q").value, note: $("ed-tip").value.trim(), tip: "", go: "" }, kind === "food" ? { meals } : {});
   const slug = (kind === "quarter" ? "q_" : "") + (n.toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g, "").replace(/ı/g, "i").replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "").slice(0, 36) || "ort");
