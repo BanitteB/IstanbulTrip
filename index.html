@@ -200,6 +200,11 @@ main>.card>h2{cursor:pointer;user-select:none;position:relative;padding-right:28
 main>.card>h2::after{content:"▾";position:absolute;right:2px;top:50%;transform:translateY(-50%);font-size:1rem;color:var(--muted);transition:transform .2s}
 main>.card.collapsed>h2{margin-bottom:0}main>.card.collapsed>h2::after{transform:translateY(-50%) rotate(-90deg)}
 main>.card.collapsed>.card-body{display:none}
+.walk{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.2fr);gap:12px;background:var(--sand);border-radius:12px;padding:12px;margin-bottom:12px;font-size:.88rem}
+.walk ol{margin:6px 0 8px;padding-left:18px}.walk li{margin:2px 0}
+#walkmap{height:240px;border-radius:10px}
+@media(max-width:700px){.walk{grid-template-columns:1fr}}
+.walk-badge{background:#fff;border-radius:999px;font-weight:700;font-size:.8rem;text-align:center;line-height:28px;box-shadow:0 2px 6px rgba(0,0,0,.25);color:#1d5c7a}
 footer{text-align:center;color:var(--muted);font-size:.78rem;padding:10px 0 30px}
 </style>
 </head>
@@ -306,6 +311,12 @@ footer{text-align:center;color:var(--muted);font-size:.78rem;padding:10px 0 30px
 
   <section class="card span2">
     <h2>🚇 So kommt ihr hin (ab Hotel)</h2>
+    <div class="walk">
+      <div><b>🚶 Von der M4 (und der Fähre) zum Hotel: ca. 6 Min.</b>
+        <ol><li>Bei <b>M4 Kadıköy</b> Richtung Fähranleger hinaus</li><li>Der <b>Rıhtım Caddesi</b> nach Norden folgen, am Busbahnhof vorbei</li><li>Kurz vor Rasimpaşa <b>rechts</b> in die Gasse, das Hotel liegt gleich dort</li></ol>
+        <a href="https://www.google.com/maps/dir/?api=1&origin=40.99068,29.02305&destination=40.99525,29.02640&travelmode=walking" target="_blank" rel="noopener">In Google Maps öffnen ↗</a></div>
+      <div id="walkmap"></div>
+    </div>
     <a class="netzwrap" href="img/netzplan.jpg" target="_blank" rel="noopener" title="Antippen zum Vergrössern"><img src="img/netzplan.jpg" alt="Istanbul Schnellverkehrsnetz: Metro, Marmaray, Tram, Fähren" class="netzimg" loading="lazy"></a>
     <p class="muted" style="margin:4px 0 0;font-size:.75rem">Antippen zum Vergrössern · Plan: Maximilian Dörrbecker (Chumwa), Stand Jan. 2023, <a href="https://creativecommons.org/licenses/by-sa/2.5/" target="_blank" rel="noopener">CC BY-SA 2.5</a> · Euer Hotel liegt bei Kadıköy (M4 / Fähre)</p>
     <p style="margin:6px 0 14px;display:flex;gap:8px;flex-wrap:wrap">
@@ -321,12 +332,12 @@ footer{text-align:center;color:var(--muted);font-size:.78rem;padding:10px 0 30px
       <div class="nf-taxi" id="taxi-card">
         <span class="muted">🚕 Fürs Taxi zeigen</span>
         <p class="nf-tr">Beni bu adrese götürür müsünüz?</p>
-        <p class="nf-addr">Otel Kadıköy<br>Uzun Hafız Sokak No: 18<br>Osmanağa, Kadıköy / İstanbul</p>
+        <p class="nf-addr">Otel Kadıköy<br>Uzun Hafız Sokak No: 18<br>Rasimpaşa, Kadıköy / İstanbul</p>
         <p class="muted" style="margin:0">„Können Sie mich zu dieser Adresse bringen?“</p>
         <div class="nf-btns">
           <button class="btn small" id="taxi-full">⛶ Gross anzeigen</button>
           <button class="btn ghost small" id="taxi-copy">📋 Adresse kopieren</button>
-          <a class="btn ghost small" href="https://www.google.com/maps/search/?api=1&query=Otel+Kad%C4%B1k%C3%B6y+Uzun+Haf%C4%B1z+Sokak+18+Kad%C4%B1k%C3%B6y" target="_blank" rel="noopener">🗺️ Google Maps</a>
+          <a class="btn ghost small" href="https://www.google.com/maps/search/?api=1&query=Otel+Kad%C4%B1k%C3%B6y+Rasimpa%C5%9Fa+Kad%C4%B1k%C3%B6y" target="_blank" rel="noopener">🗺️ Google Maps</a>
         </div>
       </div>
       <div class="nf-sos">
@@ -406,6 +417,6 @@ footer{text-align:center;color:var(--muted);font-size:.78rem;padding:10px 0 30px
 
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="app.js?v=43"></script>
+<script src="app.js?v=44"></script>
 </body>
 </html>

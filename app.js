@@ -32,7 +32,7 @@ const MEALSLOTS = {
   so: [["Frühstück", ["br", "sn"], "kad", -10]]
 };
 const BASE = {
-  hotel: { n: "Otel Kadıköy", ll: [40.9905, 29.0275], d: "Uzun Hafız Sk. 18 · 5 Min. zur Fähre" },
+  hotel: { n: "Otel Kadıköy", ll: [40.99525, 29.02640], d: "Rasimpaşa · ca. 6 Min. zu Fuss von der M4 und der Fähre" },
   saw: { n: "Flughafen Sabiha Gökçen (SAW)", ll: [40.8986, 29.3092], d: "M4 direkt bis Kadıköy, knapp 1 Std." },
   merter: { n: "Merter", ll: [41.0075, 28.8950], d: "Shopping · M4 → Marmaray bis Yenikapı → M1A bis Merter", other: true }
 };
@@ -529,10 +529,10 @@ function renderAdmIdeas() {
 // ---------- Notfall / Taxi-Karte ----------
 $("taxi-full").onclick = () => {
   const d = document.createElement("div"); d.className = "taxi-full";
-  d.innerHTML = `<p class="nf-tr">Beni bu adrese götürür müsünüz?</p><p class="nf-addr">Otel Kadıköy<br>Uzun Hafız Sokak No: 18<br>Osmanağa, Kadıköy / İstanbul</p><p class="muted">Antippen zum Schliessen</p>`;
+  d.innerHTML = `<p class="nf-tr">Beni bu adrese götürür müsünüz?</p><p class="nf-addr">Otel Kadıköy<br>Uzun Hafız Sokak No: 18<br>Rasimpaşa, Kadıköy / İstanbul</p><p class="muted">Antippen zum Schliessen</p>`;
   d.onclick = () => d.remove(); document.body.appendChild(d);
 };
-$("taxi-copy").onclick = async () => { try { await navigator.clipboard.writeText("Otel Kadıköy, Uzun Hafız Sokak No: 18, Osmanağa, Kadıköy / İstanbul"); $("taxi-copy").textContent = "✅ Kopiert" } catch (e) { $("taxi-copy").textContent = "Kopieren ging nicht" } setTimeout(() => $("taxi-copy").textContent = "📋 Adresse kopieren", 2500) };
+$("taxi-copy").onclick = async () => { try { await navigator.clipboard.writeText("Otel Kadıköy, Uzun Hafız Sokak No: 18, Rasimpaşa, Kadıköy / İstanbul"); $("taxi-copy").textContent = "✅ Kopiert" } catch (e) { $("taxi-copy").textContent = "Kopieren ging nicht" } setTimeout(() => $("taxi-copy").textContent = "📋 Adresse kopieren", 2500) };
 
 // ---------- Admin ----------
 let admPw = (() => { try { return sessionStorage.getItem("ist-adm") || "" } catch (e) { return "" } })();
@@ -662,6 +662,20 @@ $("ed-geo").onclick = geoSearch; $("ed-gm-go").onclick = parseGmaps; $("ed-img")
 $("ed-save").onclick = saveSpot; $("ed-cancel").onclick = () => { $("ed").style.display = "none" };
 window.addEventListener("hashchange", admRender);
 
+// ---------- Fussweg M4 → Hotel ----------
+const WALK = [[40.99068, 29.02305], [40.99120, 29.02400], [40.99185, 29.02505], [40.99300, 29.02490], [40.99420, 29.02475], [40.99505, 29.02470], [40.99515, 29.02560], [40.99525, 29.02640]];
+let walkMap = null;
+function initWalkMap() {
+  if (walkMap || !$("walkmap")) return;
+  walkMap = L.map("walkmap", { scrollWheelZoom: false, zoomControl: false, attributionControl: true });
+  L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", { maxZoom: 19, attribution: "© OpenStreetMap" }).addTo(walkMap);
+  L.polyline(WALK, { color: "#1d5c7a", weight: 6, opacity: .85 }).addTo(walkMap);
+  L.circleMarker(WALK[0], { radius: 8, color: "#fff", weight: 2, fillColor: "#e5007e", fillOpacity: 1 }).addTo(walkMap).bindTooltip("M4 Kadıköy", { permanent: true, direction: "left" });
+  L.circleMarker(WALK[WALK.length - 1], { radius: 9, color: "#fff", weight: 2, fillColor: "#0f2a43", fillOpacity: 1 }).addTo(walkMap).bindTooltip("Otel Kadıköy", { permanent: true, direction: "right" });
+  L.marker(WALK[4], { icon: L.divIcon({ className: "walk-badge", html: "🚶 ca. 6 Min.", iconSize: [96, 28] }) }).addTo(walkMap);
+  walkMap.fitBounds(L.latLngBounds(WALK).pad(.35));
+}
+
 // ---------- Bereiche ein-/ausklappen ----------
 (() => {
   const open = store.get("ist-open", []);
@@ -675,6 +689,7 @@ window.addEventListener("hashchange", admRender);
       sec.classList.toggle("collapsed");
       const now = store.get("ist-open", []).filter(k => k !== key); if (!sec.classList.contains("collapsed")) now.push(key); store.set("ist-open", now);
       if (!sec.classList.contains("collapsed") && sec.querySelector("#map")) setTimeout(() => map.invalidateSize(), 50);
+      if (!sec.classList.contains("collapsed") && sec.querySelector("#walkmap")) setTimeout(() => { initWalkMap(); walkMap.invalidateSize(); walkMap.fitBounds(L.latLngBounds(WALK).pad(.35)) }, 50);
     };
   });
 })();
