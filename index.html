@@ -205,7 +205,7 @@ main>.card.collapsed>.card-body{display:none}
 .walk-img{width:100%;max-height:420px;object-fit:cover;object-position:center 40%;border-radius:10px;display:block}
 @media(max-width:700px){.walk{grid-template-columns:1fr}}
 .walk-badge{background:#fff;border-radius:999px;font-weight:700;font-size:.8rem;text-align:center;line-height:28px;box-shadow:0 2px 6px rgba(0,0,0,.25);color:#1d5c7a}
-.airport{width:100%;height:480px;border:1px solid var(--line);border-radius:12px;display:block;background:#fff}
+.airport-img{width:100%;height:auto;border:1px solid var(--line);border-radius:12px;display:block;background:#fff}
 footer{text-align:center;color:var(--muted);font-size:.78rem;padding:10px 0 30px}
 </style>
 </head>
@@ -320,10 +320,10 @@ footer{text-align:center;color:var(--muted);font-size:.78rem;padding:10px 0 30px
     </div>
     <a class="netzwrap" href="img/netzplan.jpg" target="_blank" rel="noopener" title="Antippen zum Vergrössern"><img src="img/netzplan.jpg" alt="Istanbul Schnellverkehrsnetz: Metro, Marmaray, Tram, Fähren" class="netzimg" loading="lazy"></a>
     <p class="muted" style="margin:4px 0 0;font-size:.75rem">Antippen zum Vergrössern · Plan: Maximilian Dörrbecker (Chumwa), Stand Jan. 2023, <a href="https://creativecommons.org/licenses/by-sa/2.5/" target="_blank" rel="noopener">CC BY-SA 2.5</a> · Euer Hotel liegt bei Kadıköy (M4 / Fähre)</p>
-    <h3 style="font-size:1rem;margin:16px 0 6px">🛬 Flughafen-Plan Sabiha Gökçen</h3>
-    <p class="muted" style="margin:0 0 6px">Gates, Ausgänge, Cafés, Toiletten und die Metro-Station suchen. Oben links im Plan „Was suchst du?“ nutzen.</p>
-    <iframe class="airport" src="https://inmapper.com/sabihagokcen/en/?lang=de" loading="lazy" title="Flughafen-Plan Sabiha Gökçen (inMapper)" allow="geolocation"></iframe>
-    <p style="margin:6px 0 0"><a href="https://inmapper.com/sabihagokcen/en/?lang=de" target="_blank" rel="noopener">Im Vollbild öffnen ↗</a> <span class="muted">· Plan: inMapper</span></p>
+    <h3 style="font-size:1rem;margin:16px 0 6px">🛬 Flughafen Sabiha Gökçen: Ankunftsebene</h3>
+    <p class="muted" style="margin:0 0 6px">Inland (İç Hatlar) und International (Dış Hatlar) kommen in getrennten Hallen an. Zur Metro: links unten bei „METRO“. Antippen zum Vergrössern.</p>
+    <a href="img/flughafen-saw.jpg" target="_blank" rel="noopener"><img src="img/flughafen-saw.jpg" alt="Plan der Ankunftsebene am Flughafen Sabiha Gökçen" class="airport-img" loading="lazy"></a>
+    <p class="muted" style="margin:4px 0 0;font-size:.75rem">Plan: inMapper</p>
     <p style="margin:6px 0 14px;display:flex;gap:8px;flex-wrap:wrap">
       <a class="btn ghost small" href="https://www.metro.istanbul/" target="_blank" rel="noopener">🚇 Metro Istanbul (offiziell)</a>
       <a class="btn ghost small" href="https://www.google.com/maps/dir/?api=1&origin=Otel+Kad%C4%B1k%C3%B6y&travelmode=transit" target="_blank" rel="noopener">🚌 Bus & ÖV-Route planen</a></p>
@@ -422,6 +422,6 @@ footer{text-align:center;color:var(--muted);font-size:.78rem;padding:10px 0 30px
 
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="app.js?v=48"></script>
+<script src="app.js?v=49"></script>
 </body>
 </html>
