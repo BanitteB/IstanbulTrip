@@ -205,6 +205,7 @@ main>.card.collapsed>.card-body{display:none}
 .walk-img{width:100%;max-height:420px;object-fit:cover;object-position:center 40%;border-radius:10px;display:block}
 @media(max-width:700px){.walk{grid-template-columns:1fr}}
 .walk-badge{background:#fff;border-radius:999px;font-weight:700;font-size:.8rem;text-align:center;line-height:28px;box-shadow:0 2px 6px rgba(0,0,0,.25);color:#1d5c7a}
+.airport{width:100%;height:480px;border:1px solid var(--line);border-radius:12px;display:block;background:#fff}
 footer{text-align:center;color:var(--muted);font-size:.78rem;padding:10px 0 30px}
 </style>
 </head>
@@ -360,6 +361,10 @@ footer{text-align:center;color:var(--muted);font-size:.78rem;padding:10px 0 30px
       </div>
     </div>
     <p class="muted" style="margin:10px 0 0">Alle Flüge ab/an Sabiha Gökçen (SAW): mit der M4 direkt ab Kadıköy, knapp 1 Std.</p>
+    <h3 style="font-size:1rem;margin:16px 0 6px">🛬 Flughafen-Plan Sabiha Gökçen</h3>
+    <p class="muted" style="margin:0 0 6px">Gates, Ausgänge, Cafés, Toiletten und die Metro-Station suchen. Oben links im Plan „Was suchst du?“ nutzen.</p>
+    <iframe class="airport" src="https://inmapper.com/sabihagokcen/en/?lang=de" loading="lazy" title="Flughafen-Plan Sabiha Gökçen (inMapper)" allow="geolocation"></iframe>
+    <p style="margin:6px 0 0"><a href="https://inmapper.com/sabihagokcen/en/?lang=de" target="_blank" rel="noopener">Im Vollbild öffnen ↗</a> <span class="muted">· Plan: inMapper</span></p>
   </section>
 </main>
 <div id="admin" class="adm-overlay" style="display:none"><section class="card adm-box">
@@ -417,6 +422,6 @@ footer{text-align:center;color:var(--muted);font-size:.78rem;padding:10px 0 30px
 
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="app.js?v=46"></script>
+<script src="app.js?v=47"></script>
 </body>
 </html>
